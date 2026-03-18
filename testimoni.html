@@ -1,0 +1,389 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Testimoni Klien | Tugasin Digital</title>
+    <meta name="description" content="Review jujur dari klien Tugasin Digital. 4.9/5 dari 50+ order.">
+    <link href="https://fonts.googleapis.com/css2?family=Press+Start+2P&family=Poppins:wght@400;500;600;700&display=swap" rel="stylesheet">
+
+    <style>
+        :root {
+            --primary: #2a3a5a;
+            --accent:  #f4b41a;
+            --bg:      #f0f4f8;
+            --white:   #ffffff;
+            --muted:   #6b7a99;
+        }
+        * { box-sizing: border-box; margin: 0; padding: 0; }
+        body { font-family: 'Poppins', sans-serif; background: var(--bg); color: var(--primary); }
+
+        /* ── NAV ── */
+        nav {
+            background: var(--primary); padding: 0 24px;
+            display: flex; align-items: center; justify-content: space-between;
+            height: 56px; position: sticky; top: 0; z-index: 100;
+        }
+        .nav-logo { font-family: 'Press Start 2P', cursive; font-size: 0.65rem; color: var(--accent); text-decoration: none; }
+        .nav-links { display: flex; gap: 6px; align-items: center; }
+        .nav-links a { color: rgba(255,255,255,0.7); text-decoration: none; font-size: 0.78rem; padding: 6px 10px; transition: color 0.15s; }
+        .nav-links a:hover { color: var(--accent); }
+        .nav-btn { background: var(--accent); color: var(--primary) !important; font-family: 'Press Start 2P', cursive; font-size: 0.45rem !important; padding: 8px 14px !important; border: 2px solid var(--primary); }
+        .burger { display: none; background: none; border: none; color: white; font-size: 1.4rem; cursor: pointer; }
+        @media(max-width:640px) {
+            .nav-links { display:none; }
+            .nav-links.open { display:flex; flex-direction:column; position:absolute; top:56px; left:0; right:0; background:var(--primary); padding:16px; gap:4px; }
+            .burger { display:block; }
+        }
+
+        /* ── PAGE HEADER ── */
+        .page-header {
+            background: var(--primary); padding: 60px 24px 48px; text-align: center;
+            position: relative; overflow: hidden;
+        }
+        .page-header::before {
+            content:''; position:absolute; inset:0;
+            background-image:
+                linear-gradient(rgba(244,180,26,0.05) 1px,transparent 1px),
+                linear-gradient(90deg,rgba(244,180,26,0.05) 1px,transparent 1px);
+            background-size:28px 28px;
+        }
+        .page-header-content { position:relative; z-index:1; }
+        .page-label { font-family:'Press Start 2P',cursive; font-size:0.45rem; color:rgba(255,255,255,0.4); letter-spacing:2px; margin-bottom:10px; }
+        .page-title { font-family:'Press Start 2P',cursive; font-size:clamp(0.9rem,2.5vw,1.5rem); color:white; margin-bottom:10px; line-height:1.6; }
+        .page-title span { color:var(--accent); }
+        .page-sub { color:rgba(255,255,255,0.55); font-size:0.9rem; }
+
+        /* ── RATING SUMMARY ── */
+        .rating-bar {
+            background: var(--accent); border-top: 3px solid var(--primary); border-bottom: 3px solid var(--primary);
+        }
+        .rating-inner {
+            max-width: 800px; margin: 0 auto; padding: 28px 24px;
+            display: grid; grid-template-columns: auto 1fr; gap: 40px; align-items: center;
+        }
+        .rating-big { text-align: center; }
+        .rating-num { font-family: 'Press Start 2P', cursive; font-size: 2.5rem; color: var(--primary); display: block; line-height: 1; }
+        .rating-stars { font-size: 1.4rem; margin: 6px 0; }
+        .rating-count { font-size: 0.78rem; color: rgba(42,58,90,0.65); }
+        .rating-breakdown { display: flex; flex-direction: column; gap: 6px; }
+        .rating-row { display: flex; align-items: center; gap: 10px; }
+        .rating-row-label { font-size: 0.78rem; font-weight: 600; white-space: nowrap; }
+        .rating-bar-wrap { flex: 1; height: 10px; background: rgba(42,58,90,0.15); }
+        .rating-bar-fill { height: 100%; background: var(--primary); }
+        .rating-row-count { font-size: 0.72rem; color: rgba(42,58,90,0.6); white-space: nowrap; }
+
+        /* ── SECTION ── */
+        .section { padding: 52px 24px; }
+        .section-inner { max-width: 1100px; margin: 0 auto; }
+        .section-label { font-family:'Press Start 2P',cursive; font-size:0.45rem; color:var(--muted); letter-spacing:2px; text-transform:uppercase; margin-bottom:8px; }
+        .section-title { font-family:'Press Start 2P',cursive; font-size:clamp(0.8rem,2vw,1.1rem); color:var(--primary); margin-bottom:32px; line-height:1.8; }
+
+        /* ── FILTER TABS ── */
+        .filter-row { display:flex; flex-wrap:wrap; gap:8px; margin-bottom:32px; }
+        .filter-tab {
+            background:white; border:2px solid var(--primary); color:var(--primary);
+            font-family:'Press Start 2P',cursive; font-size:0.42rem; padding:7px 13px;
+            cursor:pointer; transition:all 0.15s;
+        }
+        .filter-tab:hover, .filter-tab.active { background:var(--primary); color:var(--accent); }
+
+        /* ── TESTI GRID ── */
+        .testi-grid { display:grid; grid-template-columns:repeat(auto-fill, minmax(290px,1fr)); gap:20px; }
+        .testi-card {
+            background:white; border:3px solid var(--primary); padding:22px;
+            box-shadow:5px 5px 0 var(--primary); transition:transform 0.18s, box-shadow 0.18s;
+            display:flex; flex-direction:column;
+        }
+        .testi-card:hover { transform:translate(-2px,-2px); box-shadow:7px 7px 0 var(--accent); }
+        .testi-header { display:flex; align-items:flex-start; justify-content:space-between; margin-bottom:12px; gap:8px; }
+        .testi-stars { color:var(--accent); font-size:0.95rem; white-space:nowrap; }
+        .testi-date { font-size:0.68rem; color:var(--muted); white-space:nowrap; }
+        .testi-text { font-size:0.85rem; color:var(--primary); line-height:1.7; flex:1; margin-bottom:16px; font-style:italic; }
+        .testi-author { display:flex; align-items:center; gap:10px; padding-top:14px; border-top:2px solid var(--bg); }
+        .testi-avatar {
+            width:38px; height:38px; background:var(--primary); color:var(--accent);
+            font-family:'Press Start 2P',cursive; font-size:0.7rem;
+            display:flex; align-items:center; justify-content:center; flex-shrink:0;
+        }
+        .testi-name { font-weight:700; font-size:0.85rem; }
+        .testi-meta { font-size:0.72rem; color:var(--muted); }
+        .testi-badge {
+            display:inline-block; font-size:0.62rem; font-weight:700; padding:2px 8px;
+            border:2px solid var(--primary); background:var(--accent); color:var(--primary);
+            margin-top:4px;
+        }
+
+        /* ── SUBMIT FORM ── */
+        .submit-section { background:var(--primary); border-top:4px solid var(--accent); }
+        .submit-section .section-title { color:white; }
+        .submit-section .section-label { color:rgba(255,255,255,0.4); }
+        .submit-form {
+            background:white; border:4px solid var(--accent); box-shadow:8px 8px 0 var(--accent);
+            padding:32px; max-width:600px;
+        }
+        .submit-form label { display:block; font-size:0.82rem; font-weight:600; margin-bottom:6px; color:var(--primary); }
+        .submit-form input, .submit-form select, .submit-form textarea {
+            width:100%; padding:11px 14px; border:2px solid #d0d8e8;
+            font-family:'Poppins',sans-serif; font-size:0.9rem; color:var(--primary);
+            outline:none; transition:border-color 0.15s; margin-bottom:16px;
+        }
+        .submit-form input:focus, .submit-form select:focus, .submit-form textarea:focus { border-color:var(--primary); }
+        .star-select { display:flex; gap:6px; margin-bottom:16px; }
+        .star-btn {
+            width:36px; height:36px; font-size:1.2rem; background:white; border:2px solid #d0d8e8;
+            cursor:pointer; display:flex; align-items:center; justify-content:center; transition:all 0.1s;
+        }
+        .star-btn.active { border-color:var(--accent); background:var(--accent); }
+        .btn-submit-testi {
+            background:var(--accent); color:var(--primary); width:100%;
+            border:3px solid var(--primary); font-family:'Press Start 2P',cursive; font-size:0.6rem;
+            padding:14px; cursor:pointer; box-shadow:5px 5px 0 var(--primary); transition:all 0.15s;
+        }
+        .btn-submit-testi:hover { transform:translate(-2px,-2px); box-shadow:7px 7px 0 rgba(42,58,90,0.5); }
+        .submit-note { font-size:0.72rem; color:var(--muted); margin-top:10px; text-align:center; }
+
+        /* ── CTA ── */
+        .cta-strip {
+            background:var(--accent); border-top:3px solid var(--primary); border-bottom:3px solid var(--primary);
+            padding:40px 24px; text-align:center;
+        }
+        .cta-strip h3 { font-family:'Press Start 2P',cursive; font-size:clamp(0.7rem,2vw,1rem); color:var(--primary); margin-bottom:10px; line-height:1.7; }
+        .cta-strip p { color:rgba(42,58,90,0.65); font-size:0.9rem; margin-bottom:20px; }
+        .cta-btns { display:flex; gap:12px; justify-content:center; flex-wrap:wrap; }
+        .btn-cta {
+            background:var(--primary); color:white; font-family:'Press Start 2P',cursive; font-size:0.55rem;
+            padding:12px 24px; border:3px solid var(--primary); text-decoration:none; box-shadow:5px 5px 0 rgba(42,58,90,0.3);
+            transition:all 0.15s;
+        }
+        .btn-cta:hover { transform:translate(-2px,-2px); box-shadow:7px 7px 0 rgba(42,58,90,0.3); }
+
+        /* ── FOOTER ── */
+        footer { background:var(--primary); padding:28px 24px; text-align:center; border-top:3px solid var(--accent); }
+        footer p { color:rgba(255,255,255,0.5); font-size:0.78rem; }
+        footer a { color:var(--accent); text-decoration:none; }
+    </style>
+</head>
+<body>
+
+<nav>
+    <a href="index.html" class="nav-logo">TUGASIN DIGITAL</a>
+    <div class="nav-links" id="nav-links">
+        <a href="index.html#layanan">Layanan</a>
+        <a href="index.html#tracker">Cek Order</a>
+        <a href="testimoni.html">Testimoni</a>
+        <a href="index.html#faq">FAQ</a>
+        <a href="order.html" class="nav-btn">ORDER SEKARANG</a>
+    </div>
+    <button class="burger" onclick="document.getElementById('nav-links').classList.toggle('open')">&#9776;</button>
+</nav>
+
+<!-- PAGE HEADER -->
+<div class="page-header">
+    <div class="page-header-content">
+        <div class="page-label">// REVIEW KLIEN</div>
+        <h1 class="page-title">KATA MEREKA <span>TENTANG TD</span></h1>
+        <p class="page-sub">Review jujur dari klien yang sudah menggunakan Tugasin Digital</p>
+    </div>
+</div>
+
+<!-- RATING SUMMARY -->
+<div class="rating-bar">
+    <div class="rating-inner">
+        <div class="rating-big">
+            <span class="rating-num">4.9</span>
+            <div class="rating-stars">&#9733;&#9733;&#9733;&#9733;&#9733;</div>
+            <div class="rating-count">dari 50+ klien</div>
+        </div>
+        <div class="rating-breakdown">
+            <div class="rating-row">
+                <span class="rating-row-label">5 &#9733;</span>
+                <div class="rating-bar-wrap"><div class="rating-bar-fill" style="width:90%"></div></div>
+                <span class="rating-row-count">45</span>
+            </div>
+            <div class="rating-row">
+                <span class="rating-row-label">4 &#9733;</span>
+                <div class="rating-bar-wrap"><div class="rating-bar-fill" style="width:8%"></div></div>
+                <span class="rating-row-count">4</span>
+            </div>
+            <div class="rating-row">
+                <span class="rating-row-label">3 &#9733;</span>
+                <div class="rating-bar-wrap"><div class="rating-bar-fill" style="width:2%"></div></div>
+                <span class="rating-row-count">1</span>
+            </div>
+            <div class="rating-row">
+                <span class="rating-row-label">2 &#9733;</span>
+                <div class="rating-bar-wrap"><div class="rating-bar-fill" style="width:0%"></div></div>
+                <span class="rating-row-count">0</span>
+            </div>
+            <div class="rating-row">
+                <span class="rating-row-label">1 &#9733;</span>
+                <div class="rating-bar-wrap"><div class="rating-bar-fill" style="width:0%"></div></div>
+                <span class="rating-row-count">0</span>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- TESTIMONI GRID -->
+<div class="section">
+    <div class="section-inner">
+        <div class="section-label">// SEMUA REVIEW</div>
+        <div class="section-title">APA KATA KLIEN KAMI?</div>
+
+        <div class="filter-row" id="filter-row">
+            <button class="filter-tab active" data-cat="all" onclick="filterTesti('all',this)">SEMUA</button>
+            <button class="filter-tab" data-cat="tugas" onclick="filterTesti('tugas',this)">TUGAS AKADEMIK</button>
+            <button class="filter-tab" data-cat="desain" onclick="filterTesti('desain',this)">DESAIN</button>
+            <button class="filter-tab" data-cat="coding" onclick="filterTesti('coding',this)">CODING</button>
+            <button class="filter-tab" data-cat="dokumen" onclick="filterTesti('dokumen',this)">DOKUMEN BISNIS</button>
+        </div>
+
+        <div class="testi-grid" id="testi-grid"></div>
+    </div>
+</div>
+
+<!-- SUBMIT TESTIMONI SECTION -->
+<div class="submit-section section">
+    <div class="section-inner">
+        <div class="section-label">// PERNAH ORDER?</div>
+        <div class="section-title">BAGIKAN PENGALAMANMU</div>
+        <div class="submit-form">
+            <form id="testi-form">
+                <label>Nama & Asal <span style="color:var(--muted); font-weight:400">(boleh inisial)</span></label>
+                <input type="text" id="t-name" placeholder="Contoh: Rizky A. — Mahasiswa UI" maxlength="60">
+
+                <label>Layanan yang Dipakai</label>
+                <select id="t-service">
+                    <option value="">-- Pilih Layanan --</option>
+                    <option>Esai & Makalah</option>
+                    <option>PPT & Desain Canva</option>
+                    <option>Coding</option>
+                    <option>Laporan PKL</option>
+                    <option>CV Portofolio</option>
+                    <option>Kebutuhan Organisasi</option>
+                    <option>Joki Skripsi</option>
+                    <option>Desain Poster</option>
+                    <option>Company Profile</option>
+                    <option>Paket Branding</option>
+                    <option>Lainnya</option>
+                </select>
+
+                <label>Rating</label>
+                <div class="star-select" id="star-select">
+                    <button type="button" class="star-btn" data-val="1" onclick="setRating(1)">&#9733;</button>
+                    <button type="button" class="star-btn" data-val="2" onclick="setRating(2)">&#9733;</button>
+                    <button type="button" class="star-btn" data-val="3" onclick="setRating(3)">&#9733;</button>
+                    <button type="button" class="star-btn" data-val="4" onclick="setRating(4)">&#9733;</button>
+                    <button type="button" class="star-btn" data-val="5" onclick="setRating(5)">&#9733;</button>
+                </div>
+
+                <label>Ceritain pengalamanmu</label>
+                <textarea id="t-text" rows="4" placeholder="Bagaimana proses ordernya? Apakah hasil sesuai ekspektasi?" maxlength="500"></textarea>
+
+                <button type="submit" class="btn-submit-testi">KIRIM TESTIMONI</button>
+                <p class="submit-note">Testimoni akan diverifikasi admin sebelum ditampilkan.</p>
+            </form>
+            <div id="testi-success" style="display:none; text-align:center; padding:24px">
+                <div style="font-size:2rem; margin-bottom:12px">&#127881;</div>
+                <p style="font-family:'Press Start 2P',cursive; font-size:0.65rem; color:var(--primary); margin-bottom:8px">TERIMA KASIH!</p>
+                <p style="font-size:0.85rem; color:var(--muted)">Testimoni kamu sudah kami terima dan akan segera ditampilkan setelah diverifikasi.</p>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- CTA STRIP -->
+<div class="cta-strip">
+    <h3>TERTARIK COBA LAYANAN KAMI?</h3>
+    <p>Bergabung dengan 50+ klien yang sudah puas dengan Tugasin Digital.</p>
+    <div class="cta-btns">
+        <a href="order.html" class="btn-cta">ORDER SEKARANG</a>
+        <a href="https://wa.me/6289540108751" target="_blank" class="btn-cta" style="background:#25d366">CHAT WA</a>
+    </div>
+</div>
+
+<!-- FOOTER -->
+<footer>
+    <p>© 2026 <a href="index.html">Tugasin Digital</a> · Owner: Ananda Maulid · IG: <a href="https://instagram.com/tugasin.digital" target="_blank">@tugasin.digital</a></p>
+</footer>
+
+<script>
+    // ─── STATIC TESTIMONIALS DATA ───
+    // Tambah/edit testimoni real kamu di sini setelah dapat review dari klien
+    const testimonials = [
+        { name:'Rizky A.', meta:'Mahasiswa Teknik', cat:'tugas', service:'Esai & Makalah', rating:5, date:'Mar 2026', text:'Esai 10 halaman jadi dalam 6 jam, format rapi dan tidak ada satu pun typo. Bahasa mengalir dan sesuai format kampus. Sudah repeat order 3 kali.' },
+        { name:'Sari M.', meta:'Siswi SMA', cat:'desain', service:'PPT & Desain Canva', rating:5, date:'Mar 2026', text:'PPT-nya sangat keren, guru saya sampai tanya buat di mana. Templatenya konsisten dan ada grafik interaktifnya. Harga segini tidak sebanding sama hasilnya.' },
+        { name:'Dimas P.', meta:'Mahasiswa IT', cat:'coding', service:'Coding Python', rating:5, date:'Feb 2026', text:'Coding Python saya jalan sempurna, setiap fungsi ada komentarnya jadi saya benar-benar paham alurnya. Waktu ditanya dosen bisa menjelaskan tanpa masalah.' },
+        { name:'Budi S.', meta:'S1 Manajemen', cat:'tugas', service:'Laporan PKL', rating:5, date:'Feb 2026', text:'Laporan PKL 80 halaman selesai 3 hari sebelum deadline. Struktur bab sesuai panduan kampus, daftar pustaka otomatis lengkap. Nilai PKL saya A.' },
+        { name:'Nadia K.', meta:'Pemilik UMKM', cat:'desain', service:'Paket Branding UMKM', rating:5, date:'Jan 2026', text:'Logo, poster, dan IG kit semuanya konsisten dan profesional sekali. Teman-teman banyak yang tanya desainernya siapa, langsung saya rekomendasikan Tugasin Digital.' },
+        { name:'Fitri L.', meta:'Siswi SMP', cat:'tugas', service:'Makalah', rating:5, date:'Mar 2026', text:'Harga 40 ribu dapat makalah lengkap 15 halaman. Guru saya bilang bahasanya bagus dan tertata. Tidak nyangka bisa semurah ini.' },
+        { name:'Andi W.', meta:'Mahasiswa Hukum', cat:'dokumen', service:'Company Profile', rating:5, date:'Feb 2026', text:'Company profile untuk firma hukum tempat PKL saya sangat memuaskan. Layout profesional, konten akurat, dan selesai 2 hari lebih cepat dari deadline.' },
+        { name:'Rania D.', meta:'Ketua BEM', cat:'tugas', service:'Proposal Sponsorship', rating:4, date:'Jan 2026', text:'Proposal sponsorship event kampus kami terlihat sangat profesional. Dapat 3 sponsor besar. Revisi sekali sudah langsung oke.' },
+        { name:'Kevin S.', meta:'Fresh Graduate', cat:'desain', service:'CV Portofolio', rating:5, date:'Mar 2026', text:'CV-nya ATS-friendly, layout bersih, dan ada versi Bahasa Inggrisnya. Sudah dipanggil interview 4 perusahaan dalam seminggu setelah pakai CV ini.' },
+    ];
+
+    let currentRating = 5;
+    setRating(5);
+
+    function filterTesti(cat, btn) {
+        document.querySelectorAll('.filter-tab').forEach(b => b.classList.remove('active'));
+        btn.classList.add('active');
+        const filtered = cat === 'all' ? testimonials : testimonials.filter(t => t.cat === cat);
+        renderTesti(filtered);
+    }
+
+    function renderTesti(list) {
+        const stars = n => '★'.repeat(n) + '☆'.repeat(5 - n);
+        document.getElementById('testi-grid').innerHTML = list.map(t => `
+            <div class="testi-card">
+                <div class="testi-header">
+                    <div class="testi-stars">${stars(t.rating)}</div>
+                    <div class="testi-date">${t.date}</div>
+                </div>
+                <p class="testi-text">"${t.text}"</p>
+                <div class="testi-author">
+                    <div class="testi-avatar">${t.name.charAt(0)}</div>
+                    <div>
+                        <div class="testi-name">${t.name}</div>
+                        <div class="testi-meta">${t.meta}</div>
+                        <div class="testi-badge">${t.service}</div>
+                    </div>
+                </div>
+            </div>
+        `).join('');
+    }
+
+    function setRating(val) {
+        currentRating = val;
+        document.querySelectorAll('.star-btn').forEach(btn => {
+            btn.classList.toggle('active', parseInt(btn.dataset.val) <= val);
+        });
+    }
+
+    document.getElementById('testi-form').addEventListener('submit', e => {
+        e.preventDefault();
+        const name    = document.getElementById('t-name').value.trim();
+        const service = document.getElementById('t-service').value;
+        const text    = document.getElementById('t-text').value.trim();
+
+        if (!name || !service || !text) {
+            alert('Lengkapi semua field ya.');
+            return;
+        }
+
+        // Kirim ke WA admin untuk verifikasi (atau bisa ke Supabase kalau ada tabel testimoni)
+        const msg = encodeURIComponent(
+            `[TESTIMONI BARU]\nNama: ${name}\nLayanan: ${service}\nRating: ${currentRating}/5\nReview:\n${text}`
+        );
+        window.open(`https://wa.me/6289540108751?text=${msg}`, '_blank');
+
+        document.getElementById('testi-form').style.display = 'none';
+        document.getElementById('testi-success').style.display = 'block';
+    });
+
+    // ─── INIT ───
+    renderTesti(testimonials);
+</script>
+</body>
+</html>
