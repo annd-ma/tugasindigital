@@ -7,148 +7,126 @@
   <link href="https://fonts.googleapis.com/css2?family=Press+Start+2P&family=Poppins:wght@400;500;600;700&display=swap" rel="stylesheet" />
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
   <style>
-    :root { --navy:#2a3a5a; --accent:#f4b41a; --bg:#f0f4f8; --white:#fff; --muted:#6b7a99; }
-    * { box-sizing:border-box; margin:0; padding:0; }
-    body { font-family:'Poppins',sans-serif; background:var(--bg); color:var(--navy); min-height:100vh; }
-    .pixel { font-family:'Press Start 2P',cursive; }
+    :root{--primary:#2a3a5a;--accent:#f4b41a;--bg:#f0f4f8;--muted:#6b7a99;}
+    *{box-sizing:border-box;margin:0;padding:0;}
+    body{font-family:'Poppins',sans-serif;background:var(--bg);color:var(--primary);min-height:100vh;}
+    .pixel{font-family:'Press Start 2P',cursive;}
+    nav{background:var(--primary);height:56px;display:flex;align-items:center;padding:0 24px;justify-content:space-between;position:sticky;top:0;z-index:100;}
+    .nav-logo{font-family:'Press Start 2P',cursive;font-size:.65rem;color:var(--accent);text-decoration:none;}
+    .btn-order-nav{font-family:'Press Start 2P',cursive;font-size:.44rem;background:var(--accent);color:var(--primary);padding:8px 14px;border:2px solid white;text-decoration:none;}
 
-    nav { background:var(--navy); height:56px; display:flex; align-items:center; padding:0 24px; justify-content:space-between; }
-    .nav-logo { font-family:'Press Start 2P',cursive; font-size:.65rem; color:var(--accent); text-decoration:none; }
+    .page-header{background:var(--primary);padding:56px 24px 48px;text-align:center;position:relative;overflow:hidden;}
+    .page-header::before{content:'';position:absolute;inset:0;background-image:linear-gradient(rgba(244,180,26,.05) 1px,transparent 1px),linear-gradient(90deg,rgba(244,180,26,.05) 1px,transparent 1px);background-size:28px 28px;}
 
-    /* hero strip */
-    .hero { background:var(--navy); padding:56px 24px 48px; text-align:center; position:relative; overflow:hidden; }
-    .hero::before {
-      content:''; position:absolute; inset:0;
-      background-image:linear-gradient(rgba(244,180,26,.05) 1px,transparent 1px),linear-gradient(90deg,rgba(244,180,26,.05) 1px,transparent 1px);
-      background-size:28px 28px;
-    }
+    .wrap{padding:40px 24px 64px;max-width:740px;margin:0 auto;}
 
-    /* tracker card */
-    .tracker-card {
-      background:white; border:4px solid var(--navy); box-shadow:8px 8px 0 var(--navy);
-      padding:36px; max-width:680px; margin:0 auto;
-    }
-    .tracker-input { width:100%; padding:13px 16px; border:3px solid var(--navy); font-family:'Poppins',sans-serif; font-size:1rem; outline:none; transition:border-color .15s; }
-    .tracker-input:focus { border-color:var(--accent); }
-    .btn-check { background:var(--navy); color:var(--accent); border:3px solid var(--navy); font-family:'Press Start 2P',cursive; font-size:.52rem; padding:0 22px; height:50px; cursor:pointer; white-space:nowrap; transition:all .15s; }
-    .btn-check:hover { background:var(--accent); color:var(--navy); }
+    .tracker-card{background:white;border:4px solid var(--primary);box-shadow:8px 8px 0 var(--primary);padding:32px;}
+    .track-label{font-family:'Press Start 2P',cursive;font-size:.5rem;color:var(--primary);margin-bottom:12px;}
+    .input-row{display:flex;gap:0;}
+    .track-input{flex:1;padding:13px 16px;border:3px solid var(--primary);border-right:none;font-family:'Poppins',sans-serif;font-size:1rem;outline:none;transition:border-color .15s;}
+    .track-input:focus{border-color:var(--accent);}
+    .btn-check{background:var(--primary);color:var(--accent);border:3px solid var(--primary);font-family:'Press Start 2P',cursive;font-size:.5rem;padding:0 22px;height:50px;cursor:pointer;white-space:nowrap;transition:all .15s;}
+    .btn-check:hover{background:var(--accent);color:var(--primary);}
+    .track-hint{font-size:.72rem;color:var(--muted);margin-top:7px;}
 
-    /* status stepper */
-    .stepper { display:flex; align-items:center; gap:0; margin:28px 0; }
-    .step-node {
-      display:flex; flex-direction:column; align-items:center; gap:8px; flex:1;
-    }
-    .step-dot {
-      width:36px; height:36px; border-radius:50%; border:3px solid var(--navy);
-      display:flex; align-items:center; justify-content:center;
-      font-family:'Press Start 2P',cursive; font-size:.5rem;
-      background:white; color:var(--muted); transition:all .3s;
-    }
-    .step-dot.done { background:var(--navy); color:var(--accent); }
-    .step-dot.active { background:var(--accent); color:var(--navy); box-shadow:0 0 0 4px rgba(244,180,26,.3); }
-    .step-label { font-size:.62rem; font-weight:600; color:var(--muted); text-align:center; }
-    .step-label.done { color:var(--navy); }
-    .step-label.active { color:var(--accent); font-weight:700; }
-    .step-line { height:3px; flex:1; background:#d0d8e8; margin-bottom:22px; transition:background .3s; }
-    .step-line.done { background:var(--navy); }
+    /* recent */
+    .recent-wrap{margin-top:18px;}
+    .recent-label{font-family:'Press Start 2P',cursive;font-size:.4rem;color:var(--muted);margin-bottom:8px;letter-spacing:1px;}
+    .recent-item{display:flex;align-items:center;justify-content:space-between;padding:9px 13px;background:white;border:2px solid #d0d8e8;cursor:pointer;transition:border-color .15s;margin-bottom:5px;}
+    .recent-item:hover{border-color:var(--primary);}
+    .recent-id{font-family:'Press Start 2P',cursive;font-size:.48rem;color:var(--primary);}
+    .recent-svc{font-size:.75rem;color:var(--muted);}
+
+    /* result */
+    .result-wrap{margin-top:24px;}
+    .result-box{border:3px solid var(--primary);padding:22px;background:var(--bg);}
+    .result-box.error{border-color:#e53935;background:#fff5f5;}
+
+    /* stepper */
+    .stepper{display:flex;align-items:center;margin:22px 0;}
+    .s-node{display:flex;flex-direction:column;align-items:center;gap:7px;flex:1;}
+    .s-dot{width:34px;height:34px;border-radius:50%;border:3px solid var(--primary);display:flex;align-items:center;justify-content:center;font-family:'Press Start 2P',cursive;font-size:.45rem;background:white;color:var(--muted);transition:all .3s;}
+    .s-dot.done{background:var(--primary);color:var(--accent);}
+    .s-dot.active{background:var(--accent);color:var(--primary);box-shadow:0 0 0 4px rgba(244,180,26,.3);}
+    .s-lbl{font-size:.55rem;font-weight:600;color:var(--muted);text-align:center;}
+    .s-lbl.done{color:var(--primary);}
+    .s-lbl.active{color:var(--accent);font-weight:700;}
+    .s-line{height:3px;flex:1;background:#d0d8e8;margin-bottom:20px;transition:background .3s;}
+    .s-line.done{background:var(--primary);}
 
     /* detail grid */
-    .detail-grid { display:grid; grid-template-columns:1fr 1fr; gap:14px; margin-bottom:20px; }
-    .detail-item {}
-    .detail-label { font-size:.7rem; color:var(--muted); margin-bottom:3px; }
-    .detail-val { font-weight:600; font-size:.9rem; }
+    .detail-grid{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:18px;}
+    .d-lbl{font-size:.7rem;color:var(--muted);margin-bottom:2px;}
+    .d-val{font-weight:600;font-size:.88rem;}
+    .badge{display:inline-block;padding:3px 10px;font-family:'Press Start 2P',cursive;font-size:.4rem;border:2px solid var(--primary);}
+    .b-pending{background:#fff9c4;}.b-progress{background:#bbdefb;}.b-review{background:#ffe0b2;}.b-done{background:#c8e6c9;}
+    .b-unpaid{background:#ffcdd2;}.b-dp{background:#fff9c4;}.b-lunas{background:#c8e6c9;}
 
-    /* badges */
-    .badge { display:inline-block; padding:4px 12px; font-family:'Press Start 2P',cursive; font-size:.42rem; border:2px solid var(--navy); }
-    .badge-pending  { background:#fff9c4; }
-    .badge-progress { background:#bbdefb; }
-    .badge-review   { background:#ffe0b2; }
-    .badge-done     { background:#c8e6c9; }
-    .badge-unpaid   { background:#ffcdd2; }
-    .badge-dp       { background:#fff9c4; }
-    .badge-lunas    { background:#c8e6c9; }
+    .alert-box{padding:12px 16px;border:2px solid;font-size:.82rem;margin-top:12px;line-height:1.6;}
+    .alert-warn{border-color:var(--accent);background:#fffde7;}
+    .alert-success{border-color:#4caf50;background:#e8f5e9;}
 
-    /* result states */
-    .result-wrap { margin-top:28px; }
-    .result-success { border:3px solid var(--navy); padding:24px; background:var(--bg); }
-    .result-error   { border:3px solid #e53935; padding:24px; background:#fff5f5; }
+    .result-btns{display:flex;gap:10px;flex-wrap:wrap;margin-top:18px;padding-top:14px;border-top:2px solid #d0d8e8;}
+    .btn-result{padding:10px 18px;font-weight:700;font-size:.82rem;text-decoration:none;border:2px solid var(--primary);cursor:pointer;transition:background .15s;}
+    .btn-result-wa{background:#25d366;color:white;}
+    .btn-result-wa:hover{background:#1da851;}
+    .btn-result-refresh{background:white;color:var(--primary);}
+    .btn-result-refresh:hover{background:var(--bg);}
 
-    /* progress bar for deadline */
-    .deadline-bar-wrap { height:8px; background:#d0d8e8; margin-top:6px; }
-    .deadline-bar { height:100%; background:var(--navy); transition:width .5s; }
-
-    /* recent searches */
-    .recent-item {
-      display:flex; align-items:center; justify-content:space-between; gap:10px;
-      padding:10px 14px; background:white; border:2px solid #d0d8e8;
-      cursor:pointer; transition:border-color .15s; font-size:.85rem;
-    }
-    .recent-item:hover { border-color:var(--navy); }
-    .recent-item .r-id { font-family:'Press Start 2P',cursive; font-size:.5rem; color:var(--navy); }
-    .recent-item .r-svc { font-size:.78rem; color:var(--muted); }
-
-    @media(max-width:600px){
-      .detail-grid { grid-template-columns:1fr; }
-      .stepper { flex-wrap:wrap; justify-content:center; gap:8px; }
-      .step-line { display:none; }
-    }
+    .info-cards{display:grid;grid-template-columns:1fr 1fr;gap:16px;margin-top:20px;}
+    .info-c{background:white;border:3px solid var(--primary);padding:16px;box-shadow:4px 4px 0 var(--primary);}
+    .info-c h4{font-family:'Press Start 2P',cursive;font-size:.44rem;color:var(--primary);margin-bottom:8px;}
+    .info-c p{font-size:.8rem;color:var(--muted);line-height:1.6;margin-bottom:10px;}
+    .info-c a{font-size:.75rem;color:var(--primary);font-weight:700;text-decoration:none;}
+    @media(max-width:540px){.detail-grid{grid-template-columns:1fr;}.stepper{flex-wrap:wrap;justify-content:center;}.s-line{display:none;}.info-cards{grid-template-columns:1fr;}}
   </style>
 </head>
 <body>
 
 <nav>
   <a href="index.html" class="nav-logo">TUGASIN DIGITAL</a>
-  <a href="order.html" class="pixel" style="font-size:.48rem; background:var(--accent); color:var(--navy); padding:8px 16px; border:2px solid white; text-decoration:none;">ORDER</a>
+  <a href="order.html" class="btn-order-nav">ORDER</a>
 </nav>
 
-<!-- HERO -->
-<div class="hero">
+<div class="page-header">
   <div style="position:relative;z-index:1;">
-    <div class="pixel" style="font-size:.45rem;color:rgba(255,255,255,.4);letter-spacing:2px;margin-bottom:10px;">// ORDER TRACKER</div>
-    <h1 class="pixel" style="color:white;font-size:clamp(.9rem,2.5vw,1.4rem);line-height:1.6;margin-bottom:8px;">CEK STATUS ORDERMU</h1>
-    <p style="color:rgba(255,255,255,.55);font-size:.9rem;">Masukkan ID Order dari pesan konfirmasi WhatsApp kamu</p>
+    <div class="pixel" style="font-size:.42rem;color:rgba(255,255,255,.4);letter-spacing:2px;margin-bottom:10px;">// ORDER TRACKER</div>
+    <h1 class="pixel" style="color:white;font-size:clamp(.85rem,2.5vw,1.3rem);line-height:1.6;margin-bottom:8px;">CEK STATUS ORDERMU</h1>
+    <p style="color:rgba(255,255,255,.55);">Masukkan ID Order dari pesan konfirmasi WhatsApp kamu</p>
   </div>
 </div>
 
-<!-- MAIN TRACKER -->
-<div style="padding:40px 24px 64px;">
-  <div style="max-width:760px;margin:0 auto;">
+<div class="wrap">
+  <div class="tracker-card">
+    <div class="track-label">MASUKKAN ID ORDER</div>
+    <div class="input-row">
+      <input type="text" id="track-input" class="track-input" placeholder="Contoh: TD-17389204801234" maxlength="30" onkeydown="if(event.key==='Enter')doTrack()" />
+      <button class="btn-check" onclick="doTrack()">CEK</button>
+    </div>
+    <p class="track-hint">Format ID: <strong style="color:var(--primary);">TD-[timestamp][random]</strong> &nbsp;·&nbsp; Cek pesan konfirmasi di WA kamu</p>
 
-    <div class="tracker-card">
-
-      <!-- Input row -->
-      <div class="pixel" style="font-size:.52rem;color:var(--navy);margin-bottom:14px;">MASUKKAN ID ORDER</div>
-      <div style="display:flex;gap:0;">
-        <input type="text" id="track-input" class="tracker-input" placeholder="Contoh: TD-20260318-ABCD" maxlength="25" style="flex:1;" onkeydown="if(event.key==='Enter')doTrack()" />
-        <button class="btn-check" onclick="doTrack()">CEK</button>
-      </div>
-      <p style="font-size:.72rem;color:var(--muted);margin-top:8px;">Format ID: <strong style="color:var(--navy);">TD-YYYYMMDD-XXXX</strong> &nbsp;·&nbsp; Cek pesan konfirmasi di WA kamu</p>
-
-      <!-- Recent searches -->
-      <div id="recent-wrap" style="margin-top:20px;display:none;">
-        <div class="pixel" style="font-size:.42rem;color:var(--muted);margin-bottom:8px;letter-spacing:1px;">RIWAYAT PENCARIAN</div>
-        <div id="recent-list" style="display:flex;flex-direction:column;gap:6px;"></div>
-      </div>
-
-      <!-- Result -->
-      <div id="track-result" class="result-wrap"></div>
-
+    <!-- Recent searches -->
+    <div id="recent-wrap" class="recent-wrap" style="display:none;">
+      <div class="recent-label">PENCARIAN TERAKHIR</div>
+      <div id="recent-list"></div>
     </div>
 
-    <!-- Info box -->
-    <div style="margin-top:20px;display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:16px;">
-      <div style="background:white;border:3px solid var(--navy);padding:18px;box-shadow:4px 4px 0 var(--navy);">
-        <div class="pixel" style="font-size:.45rem;color:var(--navy);margin-bottom:8px;">TIDAK PUNYA ID?</div>
-        <p style="font-size:.8rem;color:var(--muted);line-height:1.6;margin-bottom:12px;">ID dikirim ke WhatsApp kamu saat konfirmasi order. Cek chat dengan nomor 0895-401087518.</p>
-        <a href="https://wa.me/6289540108751" target="_blank" style="font-size:.72rem;color:var(--navy);font-weight:700;text-decoration:none;">Hubungi Admin &rarr;</a>
-      </div>
-      <div style="background:var(--accent);border:3px solid var(--navy);padding:18px;box-shadow:4px 4px 0 var(--navy);">
-        <div class="pixel" style="font-size:.45rem;color:var(--navy);margin-bottom:8px;">BELUM ORDER?</div>
-        <p style="font-size:.8rem;color:rgba(42,58,90,.7);line-height:1.6;margin-bottom:12px;">Mulai order sekarang, tim kami siap handle dari Rp 20K.</p>
-        <a href="order.html" style="font-size:.72rem;color:var(--navy);font-weight:700;text-decoration:none;">Order Sekarang &rarr;</a>
-      </div>
-    </div>
+    <!-- Result -->
+    <div id="track-result" class="result-wrap"></div>
+  </div>
 
+  <!-- Info cards -->
+  <div class="info-cards">
+    <div class="info-c">
+      <h4>TIDAK PUNYA ID?</h4>
+      <p>ID dikirim ke WA kamu saat konfirmasi order. Cek chat dengan nomor 0895401087518.</p>
+      <a href="https://wa.me/62895401087518?text=Halo!%20Saya%20tidak%20menemukan%20ID%20order%20saya." target="_blank">Hubungi Admin &rarr;</a>
+    </div>
+    <div class="info-c" style="background:var(--accent);">
+      <h4>BELUM ORDER?</h4>
+      <p>Mulai order sekarang, tim kami siap handle dari Rp 20K.</p>
+      <a href="order.html">Order Sekarang &rarr;</a>
+    </div>
   </div>
 </div>
 
@@ -157,93 +135,74 @@
   const _KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InpvcG5vd2dkcGhleWxudnpqcmxiIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzM4MTE2MzAsImV4cCI6MjA4OTM4NzYzMH0.9VomavT2pF6vvjzVhC5HQVCMTidTesukGAqAnPC8UyI";
   const db = supabase.createClient(_URL, _KEY);
 
-  // ─── RECENT SEARCHES (localStorage) ───
-  function getRecent() {
-    try { return JSON.parse(localStorage.getItem('td_recent') || '[]'); } catch { return []; }
-  }
+  // ─── RECENT (localStorage) ───
+  function getRecent() { try { return JSON.parse(localStorage.getItem('td_recent')||'[]'); } catch { return []; } }
   function saveRecent(id, svc) {
-    let r = getRecent().filter(x => x.id !== id);
-    r.unshift({ id, svc });
-    r = r.slice(0, 5);
+    let r = getRecent().filter(x=>x.id!==id);
+    r.unshift({id,svc}); r=r.slice(0,5);
     try { localStorage.setItem('td_recent', JSON.stringify(r)); } catch {}
   }
   function renderRecent() {
     const list = getRecent();
     const wrap = document.getElementById('recent-wrap');
-    const el   = document.getElementById('recent-list');
-    if (!list.length) { wrap.style.display = 'none'; return; }
+    const el = document.getElementById('recent-list');
+    if (!list.length) { wrap.style.display='none'; return; }
     wrap.style.display = 'block';
     el.innerHTML = list.map(r => `
       <div class="recent-item" onclick="quickSearch('${r.id}')">
-        <div>
-          <div class="r-id">${r.id}</div>
-          <div class="r-svc">${r.svc || ''}</div>
-        </div>
+        <div><div class="recent-id">${r.id}</div><div class="recent-svc">${r.svc||''}</div></div>
         <span style="font-size:.75rem;color:var(--muted);">&rarr;</span>
       </div>`).join('');
   }
-  function quickSearch(id) {
-    document.getElementById('track-input').value = id;
-    doTrack();
-  }
+  function quickSearch(id) { document.getElementById('track-input').value=id; doTrack(); }
 
-  // ─── STEP LABEL → STATUS MAP ───
-  const STATUS_STEPS = {
-    'Baru':        0,
-    'Pending':     0,
-    'In Progress': 1,
-    'Review':      2,
-    'Selesai':     3,
-  };
-  const STEP_LABELS = ['PENDING', 'PROSES', 'REVIEW', 'SELESAI'];
+  // ─── STATUS → STEP INDEX ───
+  const stepIdx = { 'Baru':0,'Pending':0,'In Progress':1,'Review':2,'Selesai':3 };
+  const stepLabels = ['PENDING','PROSES','REVIEW','SELESAI'];
 
   function buildStepper(status) {
-    const cur = STATUS_STEPS[status] ?? 0;
-    let html = '';
-    STEP_LABELS.forEach((lbl, i) => {
-      const state = i < cur ? 'done' : i === cur ? 'active' : '';
-      const dot   = i < cur ? '&#10003;' : i + 1;
-      html += `<div class="step-node">
-        <div class="step-dot ${state}">${dot}</div>
-        <div class="step-label ${state}">${lbl}</div>
-      </div>`;
-      if (i < STEP_LABELS.length - 1) {
-        html += `<div class="step-line ${i < cur ? 'done' : ''}"></div>`;
-      }
+    const cur = stepIdx[status] ?? 0;
+    let h = '';
+    stepLabels.forEach((lbl,i) => {
+      const st = i<cur?'done':i===cur?'active':'';
+      const dot = i<cur?'&#10003;':(i+1);
+      h += `<div class="s-node"><div class="s-dot ${st}">${dot}</div><div class="s-lbl ${st}">${lbl}</div></div>`;
+      if (i<stepLabels.length-1) h += `<div class="s-line ${i<cur?'done':''}"></div>`;
     });
-    return html;
+    return h;
   }
 
-  function statusBadge(s) {
-    const map = { 'Baru':'badge-pending','Pending':'badge-pending','In Progress':'badge-progress','Review':'badge-review','Selesai':'badge-done' };
-    return `<span class="badge ${map[s]||'badge-pending'}">${s||'Pending'}</span>`;
+  function sBadge(s) {
+    const m={'Baru':'b-pending','Pending':'b-pending','In Progress':'b-progress','Review':'b-review','Selesai':'b-done'};
+    return `<span class="badge ${m[s]||'b-pending'}">${s||'Pending'}</span>`;
   }
-  function payBadge(p) {
-    const map = { 'Belum Bayar':'badge-unpaid','DP 50%':'badge-dp','Lunas':'badge-lunas' };
-    return `<span class="badge ${map[p]||'badge-unpaid'}">${p||'Belum Bayar'}</span>`;
+  function pBadge(p) {
+    const m={'Belum Bayar':'b-unpaid','DP 50%':'b-dp','Lunas':'b-lunas'};
+    return `<span class="badge ${m[p]||'b-unpaid'}">${p||'Belum Bayar'}</span>`;
   }
 
-  // ─── MAIN TRACK FUNCTION ───
+  // ─── MAIN TRACK ───
   async function doTrack() {
     const raw = document.getElementById('track-input').value.trim().toUpperCase();
     if (!raw) return;
-
     const result = document.getElementById('track-result');
-    result.innerHTML = `<div style="text-align:center;padding:32px;color:var(--muted);font-size:.85rem;">Mencari order <strong>${raw}</strong>...</div>`;
+    result.innerHTML = `<div style="text-align:center;padding:28px;color:var(--muted);font-size:.85rem;">Mencari order <strong>${raw}</strong>...</div>`;
 
-    const { data, error } = await db.from('orders').select('order_id,customer_name,service_name,deadline,status,payment_status,price,created_at').eq('order_id', raw).single();
+    const { data, error } = await db.from('orders')
+      .select('order_id,customer_name,service_name,deadline,status,payment_status,price,created_at')
+      .eq('order_id', raw).single();
 
     if (error || !data) {
       result.innerHTML = `
-        <div class="result-error">
-          <div class="pixel" style="font-size:.6rem;color:#c62828;margin-bottom:10px;">ORDER TIDAK DITEMUKAN</div>
-          <p style="font-size:.85rem;color:#b71c1c;margin-bottom:14px;">ID <strong>${raw}</strong> tidak ada di sistem kami.</p>
-          <ul style="font-size:.82rem;color:var(--muted);line-height:1.8;padding-left:16px;margin-bottom:16px;">
-            <li>Pastikan penulisan ID sudah benar (huruf kapital semua)</li>
-            <li>Cek kembali pesan konfirmasi di WhatsApp</li>
+        <div class="result-box error">
+          <div class="pixel" style="font-size:.58rem;color:#c62828;margin-bottom:10px;">ORDER TIDAK DITEMUKAN</div>
+          <p style="font-size:.85rem;color:#b71c1c;margin-bottom:12px;">ID <strong>${raw}</strong> tidak ada di sistem kami.</p>
+          <ul style="font-size:.82rem;color:var(--muted);line-height:1.8;padding-left:16px;margin-bottom:14px;">
+            <li>Pastikan penulisan ID sudah benar (cek di pesan WA konfirmasi kamu)</li>
+            <li>ID bersifat case-sensitive, gunakan format persis seperti yang dikirim</li>
             <li>Kalau masih tidak ketemu, hubungi admin</li>
           </ul>
-          <a href="https://wa.me/6289540108751?text=Halo!%20ID%20order%20${raw}%20tidak%20ditemukan%20di%20tracker." target="_blank" style="display:inline-block;background:var(--navy);color:white;padding:10px 20px;font-weight:700;font-size:.82rem;text-decoration:none;border:2px solid var(--navy);">Hubungi Admin</a>
+          <a href="https://wa.me/62895401087518?text=Halo!%20ID%20order%20${raw}%20tidak%20ditemukan%20di%20tracker." target="_blank" style="display:inline-block;background:var(--primary);color:white;padding:10px 18px;font-weight:700;font-size:.82rem;text-decoration:none;border:2px solid var(--primary);">Hubungi Admin</a>
         </div>`;
       return;
     }
@@ -254,84 +213,45 @@
     const waMsg = encodeURIComponent(`Halo! Mau tanya progress order ${data.order_id} (${data.service_name}).`);
 
     result.innerHTML = `
-      <div class="result-success">
-
-        <!-- order ID header -->
-        <div style="display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:10px;margin-bottom:20px;">
+      <div class="result-box">
+        <div style="display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:8px;margin-bottom:18px;">
           <div>
-            <div style="font-size:.7rem;color:var(--muted);margin-bottom:4px;">ID Order</div>
-            <div class="pixel" style="font-size:.7rem;color:var(--navy);">${data.order_id}</div>
+            <div class="d-lbl">ID Order</div>
+            <div class="pixel" style="font-size:.65rem;color:var(--primary);">${data.order_id}</div>
           </div>
-          <div style="display:flex;gap:8px;flex-wrap:wrap;">
-            ${statusBadge(data.status)}
-            ${payBadge(data.payment_status)}
+          <div style="display:flex;gap:7px;flex-wrap:wrap;">
+            ${sBadge(data.status)}
+            ${pBadge(data.payment_status)}
           </div>
         </div>
 
-        <!-- stepper -->
         <div class="stepper">${buildStepper(data.status)}</div>
 
-        <!-- detail grid -->
-        <div style="border-top:2px solid #d0d8e8;padding-top:20px;">
+        <div style="border-top:2px solid #d0d8e8;padding-top:16px;">
           <div class="detail-grid">
-            <div class="detail-item">
-              <div class="detail-label">Nama Klien</div>
-              <div class="detail-val">${data.customer_name}</div>
-            </div>
-            <div class="detail-item">
-              <div class="detail-label">Layanan</div>
-              <div class="detail-val">${data.service_name}</div>
-            </div>
-            <div class="detail-item">
-              <div class="detail-label">Deadline</div>
-              <div class="detail-val">${data.deadline || '-'}</div>
-            </div>
-            <div class="detail-item">
-              <div class="detail-label">Harga</div>
-              <div class="detail-val" style="color:#e67e22;">${data.price ? 'Rp ' + Number(data.price).toLocaleString('id-ID') : 'Belum ditentukan'}</div>
-            </div>
-            <div class="detail-item">
-              <div class="detail-label">Tanggal Order</div>
-              <div class="detail-val">${data.created_at ? new Date(data.created_at).toLocaleDateString('id-ID',{day:'2-digit',month:'long',year:'numeric'}) : '-'}</div>
-            </div>
-            <div class="detail-item">
-              <div class="detail-label">Status Pembayaran</div>
-              <div class="detail-val">${payBadge(data.payment_status)}</div>
-            </div>
+            <div><div class="d-lbl">Nama Klien</div><div class="d-val">${data.customer_name}</div></div>
+            <div><div class="d-lbl">Layanan</div><div class="d-val">${data.service_name}</div></div>
+            <div><div class="d-lbl">Deadline</div><div class="d-val">${data.deadline||'-'}</div></div>
+            <div><div class="d-lbl">Harga</div><div class="d-val" style="color:#e67e22;">${data.price?'Rp '+Number(data.price).toLocaleString('id-ID'):'Belum ditentukan'}</div></div>
+            <div><div class="d-lbl">Tanggal Order</div><div class="d-val">${data.created_at?new Date(data.created_at).toLocaleDateString('id-ID',{day:'2-digit',month:'long',year:'numeric'}):'-'}</div></div>
+            <div><div class="d-lbl">Pembayaran</div><div class="d-val">${pBadge(data.payment_status)}</div></div>
           </div>
 
-          ${data.payment_status === 'DP 50%' ? `
-          <div style="background:#fffde7;border:2px solid var(--accent);padding:14px;margin-top:4px;">
-            <div class="pixel" style="font-size:.45rem;color:var(--navy);margin-bottom:6px;">MENUNGGU PELUNASAN</div>
-            <p style="font-size:.82rem;color:rgba(42,58,90,.75);">Hasil kerja sudah siap dikirim setelah pelunasan 50% diterima. Segera lunasi agar file dapat diteruskan.</p>
-          </div>` : ''}
-
-          ${data.status === 'Selesai' ? `
-          <div style="background:#e8f5e9;border:2px solid #4caf50;padding:14px;margin-top:4px;">
-            <div class="pixel" style="font-size:.45rem;color:#2e7d32;margin-bottom:6px;">ORDER SELESAI</div>
-            <p style="font-size:.82rem;color:#388e3c;">Ordermu telah selesai dikerjakan. File sudah dikirim via Google Drive. Terima kasih sudah menggunakan Tugasin Digital!</p>
-          </div>` : ''}
-
+          ${data.payment_status==='DP 50%'?`<div class="alert-box alert-warn"><strong style="font-family:'Press Start 2P',cursive;font-size:.42rem;display:block;margin-bottom:5px;">MENUNGGU PELUNASAN</strong>Hasil kerja sudah siap dikirim setelah pelunasan 50% diterima. Segera lunasi agar file bisa diteruskan.</div>`:''}
+          ${data.status==='Selesai'?`<div class="alert-box alert-success"><strong style="font-family:'Press Start 2P',cursive;font-size:.42rem;display:block;margin-bottom:5px;">ORDER SELESAI</strong>Ordermu selesai dikerjakan. File sudah dikirim via Google Drive. Terima kasih sudah menggunakan Tugasin Digital!</div>`:''}
         </div>
 
-        <!-- action buttons -->
-        <div style="display:flex;gap:10px;flex-wrap:wrap;margin-top:20px;padding-top:16px;border-top:2px solid #d0d8e8;">
-          <a href="https://wa.me/6289540108751?text=${waMsg}" target="_blank" style="background:#25d366;color:white;padding:10px 18px;font-weight:700;font-size:.82rem;text-decoration:none;border:2px solid var(--navy);">Tanya Progress</a>
-          <button onclick="doTrack()" style="background:white;color:var(--navy);padding:10px 18px;font-weight:700;font-size:.82rem;border:2px solid var(--navy);cursor:pointer;transition:background .15s;" onmouseover="this.style.background='var(--bg)'" onmouseout="this.style.background='white'">Refresh Status</button>
+        <div class="result-btns">
+          <a href="https://wa.me/62895401087518?text=${waMsg}" target="_blank" class="btn-result btn-result-wa">Tanya Progress</a>
+          <button onclick="doTrack()" class="btn-result btn-result-refresh">Refresh Status</button>
         </div>
-
       </div>`;
   }
 
   // ─── INIT ───
   renderRecent();
-
-  // Auto-run if ?id= param present
-  const paramId = new URLSearchParams(location.search).get('id');
-  if (paramId) {
-    document.getElementById('track-input').value = paramId;
-    doTrack();
-  }
+  const p = new URLSearchParams(location.search).get('id');
+  if (p) { document.getElementById('track-input').value = p; doTrack(); }
 </script>
 </body>
 </html>
