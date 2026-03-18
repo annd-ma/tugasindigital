@@ -1,745 +1,520 @@
 <!DOCTYPE html>
 <html lang="id">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Admin Dashboard | Tugasin Digital</title>
-    <link href="https://fonts.googleapis.com/css2?family=Press+Start+2P&family=Poppins:wght@400;500;600;700&display=swap" rel="stylesheet">
-    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Admin Dashboard | Tugasin Digital</title>
+  <link href="https://fonts.googleapis.com/css2?family=Press+Start+2P&family=Poppins:wght@400;500;600;700&display=swap" rel="stylesheet" />
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <style>
+    :root { --navy:#2a3a5a; --accent:#f4b41a; --bg:#f0f4f8; --white:#fff; --muted:#6b7a99; }
+    * { box-sizing:border-box; margin:0; padding:0; }
+    body { font-family:'Poppins',sans-serif; background:var(--bg); color:var(--navy); }
+    .pixel { font-family:'Press Start 2P',cursive; }
 
-    <style>
-        :root { --primary:#2a3a5a; --accent:#f4b41a; --bg:#f0f4f8; --white:#fff; --muted:#6b7a99; }
-        * { box-sizing:border-box; margin:0; padding:0; }
-        body { font-family:'Poppins',sans-serif; background:var(--bg); color:var(--primary); }
+    /* ── SIDEBAR ── */
+    .sidebar {
+      width:220px; background:var(--navy); position:fixed; top:0; left:0; bottom:0;
+      overflow-y:auto; z-index:50; display:flex; flex-direction:column;
+    }
+    .sb-header { padding:20px 18px 16px; border-bottom:1px solid rgba(255,255,255,.1); }
+    .sb-logo { font-family:'Press Start 2P',cursive; font-size:.58rem; color:var(--accent); }
+    .sb-sub  { font-size:.72rem; color:rgba(255,255,255,.35); margin-top:4px; }
+    .sb-nav  { padding:12px 0; flex:1; }
+    .sb-sec  { font-size:.6rem; color:rgba(255,255,255,.3); padding:0 18px 6px; margin-top:10px; letter-spacing:1px; }
+    .sb-item {
+      display:flex; align-items:center; gap:10px; padding:10px 18px;
+      font-size:.82rem; color:rgba(255,255,255,.6); cursor:pointer; transition:all .15s; text-decoration:none;
+    }
+    .sb-item:hover, .sb-item.active { background:rgba(244,180,26,.12); color:var(--accent); }
+    .sb-icon { width:18px; text-align:center; font-size:.9rem; }
+    .sb-footer { padding:14px 18px; border-top:1px solid rgba(255,255,255,.1); }
+    .sb-email { font-size:.7rem; color:rgba(255,255,255,.35); white-space:nowrap; overflow:hidden; text-overflow:ellipsis; margin-bottom:8px; }
+    .btn-logout { width:100%; padding:7px; background:rgba(255,255,255,.07); border:1px solid rgba(255,255,255,.15); color:rgba(255,255,255,.5); font-family:'Press Start 2P',cursive; font-size:.38rem; cursor:pointer; transition:all .15s; }
+    .btn-logout:hover { background:rgba(229,57,53,.2); color:#ef9a9a; }
 
-        /* ── LOGIN ── */
-        #login-screen {
-            min-height:100vh; display:flex; align-items:center; justify-content:center;
-            background:var(--primary);
-            background-image:linear-gradient(rgba(244,180,26,0.05) 1px,transparent 1px),linear-gradient(90deg,rgba(244,180,26,0.05) 1px,transparent 1px);
-            background-size:28px 28px;
-        }
-        .login-box {
-            background:white; border:4px solid var(--accent); box-shadow:10px 10px 0 var(--accent);
-            padding:40px 36px; width:100%; max-width:400px;
-        }
-        .login-title { font-family:'Press Start 2P',cursive; font-size:0.7rem; color:var(--primary); margin-bottom:6px; }
-        .login-sub { font-size:0.8rem; color:var(--muted); margin-bottom:28px; }
-        .login-box label { display:block; font-size:0.8rem; font-weight:600; margin-bottom:5px; }
-        .login-box input {
-            width:100%; padding:11px 14px; border:2px solid #d0d8e8; font-family:'Poppins',sans-serif;
-            font-size:0.9rem; outline:none; transition:border-color 0.15s; margin-bottom:16px;
-        }
-        .login-box input:focus { border-color:var(--primary); }
-        .btn-login {
-            width:100%; padding:14px; background:var(--primary); color:white;
-            border:3px solid var(--primary); font-family:'Press Start 2P',cursive; font-size:0.6rem;
-            cursor:pointer; box-shadow:5px 5px 0 var(--accent); transition:all 0.15s;
-        }
-        .btn-login:hover:not(:disabled) { background:var(--accent); color:var(--primary); }
-        .btn-login:disabled { opacity:0.5; cursor:not-allowed; box-shadow:none; }
-        .login-error { background:#fff0f0; border:2px solid #e53935; padding:10px 14px; font-size:0.82rem; color:#c62828; margin-bottom:16px; display:none; }
-        .back-link { display:block; text-align:center; margin-top:16px; font-size:0.78rem; color:var(--muted); text-decoration:none; }
-        .back-link:hover { color:var(--primary); }
+    /* ── MAIN ── */
+    .main { margin-left:220px; }
+    .topbar { background:white; border-bottom:3px solid var(--navy); height:52px; display:flex; align-items:center; justify-content:space-between; padding:0 24px; position:sticky; top:0; z-index:40; }
+    .topbar-title { font-family:'Press Start 2P',cursive; font-size:.58rem; color:var(--navy); }
+    .topbar-right { display:flex; align-items:center; gap:10px; }
+    .live { width:8px; height:8px; background:#4caf50; border-radius:50%; animation:pulse 2s infinite; }
+    @keyframes pulse { 50%{opacity:.4} }
+    .btn-sm { padding:6px 14px; font-family:'Press Start 2P',cursive; font-size:.4rem; border:2px solid var(--navy); background:white; color:var(--navy); cursor:pointer; transition:all .15s; }
+    .btn-sm:hover { background:var(--navy); color:var(--accent); }
+    .btn-sm-acc { background:var(--accent); color:var(--navy); }
+    .btn-sm-acc:hover { background:var(--navy); color:var(--accent); }
 
-        /* ── DASHBOARD ── */
-        #dashboard { display:none; }
-        .dash-layout { display:grid; grid-template-columns:220px 1fr; min-height:100vh; }
+    .body { padding:24px; }
+    .section-hidden { display:none; }
 
-        /* sidebar */
-        .sidebar {
-            background:var(--primary); position:fixed; top:0; left:0; bottom:0; width:220px;
-            overflow-y:auto; z-index:50;
-        }
-        .sidebar-header { padding:20px 18px 14px; border-bottom:1px solid rgba(255,255,255,0.1); }
-        .sidebar-logo { font-family:'Press Start 2P',cursive; font-size:0.55rem; color:var(--accent); }
-        .sidebar-sub { font-size:0.72rem; color:rgba(255,255,255,0.45); margin-top:4px; }
-        .sidebar-section { padding:16px 0 0; }
-        .sidebar-section-label { font-size:0.6rem; color:rgba(255,255,255,0.3); padding:0 18px 6px; letter-spacing:1px; text-transform:uppercase; }
-        .nav-item {
-            display:flex; align-items:center; gap:10px; padding:10px 18px; cursor:pointer;
-            font-size:0.82rem; color:rgba(255,255,255,0.65); transition:all 0.15s; text-decoration:none;
-        }
-        .nav-item:hover, .nav-item.active { background:rgba(244,180,26,0.12); color:var(--accent); }
-        .nav-item-icon { font-size:0.9rem; width:18px; flex-shrink:0; }
-        .sidebar-user { position:absolute; bottom:0; left:0; right:0; padding:14px 18px; border-top:1px solid rgba(255,255,255,0.1); }
-        .sidebar-user-email { font-size:0.72rem; color:rgba(255,255,255,0.45); white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
-        .btn-logout {
-            width:100%; margin-top:8px; padding:7px; background:rgba(255,255,255,0.08);
-            border:1px solid rgba(255,255,255,0.2); color:rgba(255,255,255,0.65);
-            font-family:'Press Start 2P',cursive; font-size:0.4rem; cursor:pointer; transition:all 0.15s;
-        }
-        .btn-logout:hover { background:rgba(229,57,53,0.2); color:#ef9a9a; }
+    /* ── STATS ── */
+    .stats { display:grid; grid-template-columns:repeat(4,1fr); gap:16px; margin-bottom:24px; }
+    .stat { background:white; border:3px solid var(--navy); padding:18px; box-shadow:5px 5px 0 var(--navy); transition:transform .15s,box-shadow .15s; }
+    .stat:hover { transform:translate(-2px,-2px); box-shadow:7px 7px 0 var(--accent); }
+    .stat-lbl { font-size:.72rem; color:var(--muted); margin-bottom:8px; }
+    .stat-val { font-family:'Press Start 2P',cursive; font-size:1.4rem; color:var(--navy); }
+    .stat-val.acc { color:var(--accent); }
 
-        /* main */
-        .main-area { margin-left:220px; }
-        .topbar {
-            background:white; border-bottom:3px solid var(--primary); padding:0 24px;
-            height:52px; display:flex; align-items:center; justify-content:space-between;
-            position:sticky; top:0; z-index:40;
-        }
-        .topbar-title { font-family:'Press Start 2P',cursive; font-size:0.6rem; color:var(--primary); }
-        .topbar-right { display:flex; align-items:center; gap:10px; }
-        .live-dot { width:8px; height:8px; background:#4caf50; border-radius:50%; animation:pulse 2s infinite; }
-        @keyframes pulse { 0%,100%{opacity:1} 50%{opacity:0.4} }
-        .btn-sm {
-            padding:6px 14px; font-family:'Press Start 2P',cursive; font-size:0.42rem;
-            cursor:pointer; border:2px solid var(--primary); transition:all 0.15s;
-        }
-        .btn-sm-outline { background:white; color:var(--primary); }
-        .btn-sm-outline:hover { background:var(--primary); color:var(--accent); }
-        .btn-sm-accent { background:var(--accent); color:var(--primary); }
-        .btn-sm-accent:hover { background:var(--primary); color:var(--accent); }
+    /* ── TOOLBAR ── */
+    .toolbar { display:flex; flex-wrap:wrap; gap:10px; align-items:center; margin-bottom:14px; }
+    .search { padding:9px 14px; border:2px solid #d0d8e8; font-family:'Poppins',sans-serif; font-size:.85rem; outline:none; min-width:200px; flex:1; transition:border-color .15s; }
+    .search:focus { border-color:var(--navy); }
+    .ftab { padding:6px 12px; font-family:'Press Start 2P',cursive; font-size:.38rem; border:2px solid var(--navy); background:white; color:var(--navy); cursor:pointer; transition:all .15s; white-space:nowrap; }
+    .ftab:hover, .ftab.active { background:var(--navy); color:var(--accent); }
 
-        .page-body { padding:24px; }
-        .section-hidden { display:none; }
+    /* ── TABLE ── */
+    .tbl-wrap { background:white; border:3px solid var(--navy); box-shadow:5px 5px 0 var(--navy); overflow-x:auto; }
+    table { width:100%; border-collapse:collapse; }
+    thead th { background:var(--navy); color:white; padding:12px 14px; text-align:left; font-family:'Press Start 2P',cursive; font-size:.38rem; white-space:nowrap; }
+    tbody td { padding:11px 14px; border-bottom:2px solid var(--bg); font-size:.82rem; vertical-align:middle; }
+    tbody tr:hover td { background:#fafbfd; }
+    .td-id { font-family:'Press Start 2P',cursive; font-size:.48rem; }
+    .sel { padding:5px 8px; border:2px solid #d0d8e8; font-family:'Poppins',sans-serif; font-size:.78rem; color:var(--navy); background:white; cursor:pointer; outline:none; transition:border-color .15s; max-width:140px; }
+    .sel:focus { border-color:var(--navy); }
+    .act-btns { display:flex; gap:5px; flex-wrap:nowrap; }
+    .act { padding:5px 9px; font-family:'Press Start 2P',cursive; font-size:.36rem; border:2px solid var(--navy); background:white; color:var(--navy); cursor:pointer; transition:all .15s; white-space:nowrap; }
+    .act:hover { background:var(--navy); color:var(--accent); }
+    .act-wa { border-color:#25d366; color:#25d366; }
+    .act-wa:hover { background:#25d366; color:white; }
+    .act-del { border-color:#e53935; color:#e53935; }
+    .act-del:hover { background:#e53935; color:white; }
+    .tbl-foot { padding:10px 14px; font-size:.78rem; color:var(--muted); border-top:2px solid var(--bg); }
 
-        /* ── STAT CARDS ── */
-        .stats-row { display:grid; grid-template-columns:repeat(4,1fr); gap:16px; margin-bottom:24px; }
-        .stat-card {
-            background:white; border:3px solid var(--primary); padding:18px;
-            box-shadow:5px 5px 0 var(--primary); transition:transform 0.15s, box-shadow 0.15s;
-        }
-        .stat-card:hover { transform:translate(-2px,-2px); box-shadow:7px 7px 0 var(--accent); }
-        .stat-label { font-size:0.72rem; color:var(--muted); margin-bottom:8px; }
-        .stat-val { font-family:'Press Start 2P',cursive; font-size:1.5rem; color:var(--primary); }
-        .stat-val.accent { color:var(--accent); }
-        .stat-sub { font-size:0.68rem; color:var(--muted); margin-top:4px; }
+    /* ── SVC GRID ── */
+    .svc-grid { display:grid; grid-template-columns:repeat(auto-fill,minmax(270px,1fr)); gap:16px; }
+    .svc-card { background:white; border:3px solid var(--navy); padding:18px; box-shadow:4px 4px 0 var(--navy); transition:transform .15s,box-shadow .15s; }
+    .svc-card:hover { transform:translate(-1px,-1px); box-shadow:6px 6px 0 var(--accent); }
 
-        /* ── TOOLBAR ── */
-        .toolbar { display:flex; flex-wrap:wrap; gap:10px; align-items:center; margin-bottom:16px; }
-        .search-input {
-            padding:9px 14px; border:2px solid #d0d8e8; font-family:'Poppins',sans-serif;
-            font-size:0.85rem; outline:none; min-width:220px; flex:1; transition:border-color 0.15s;
-        }
-        .search-input:focus { border-color:var(--primary); }
-        .filter-tabs { display:flex; flex-wrap:wrap; gap:6px; }
-        .ftab {
-            padding:6px 12px; font-family:'Press Start 2P',cursive; font-size:0.38rem;
-            border:2px solid var(--primary); background:white; color:var(--primary); cursor:pointer; transition:all 0.15s;
-        }
-        .ftab:hover, .ftab.active { background:var(--primary); color:var(--accent); }
+    /* ── REVENUE ── */
+    .rev-stats { display:grid; grid-template-columns:repeat(3,1fr); gap:16px; margin-bottom:24px; }
+    .bar-wrap { height:8px; background:var(--bg); }
+    .bar-fill { height:100%; background:var(--navy); transition:width .5s; }
 
-        /* ── TABLE ── */
-        .table-wrap { background:white; border:3px solid var(--primary); box-shadow:5px 5px 0 var(--primary); overflow-x:auto; }
-        table { width:100%; border-collapse:collapse; }
-        thead th {
-            background:var(--primary); color:white; padding:12px 14px; text-align:left;
-            font-family:'Press Start 2P',cursive; font-size:0.42rem; white-space:nowrap; border-right:1px solid rgba(255,255,255,0.1);
-        }
-        tbody td { padding:11px 14px; border-bottom:2px solid var(--bg); font-size:0.82rem; vertical-align:middle; }
-        tbody tr:hover td { background:#fafbfc; }
-        .td-id { font-family:'Press Start 2P',cursive; font-size:0.5rem; }
-        .td-name { font-weight:600; }
-        .td-wa { font-size:0.72rem; color:var(--muted); }
+    /* ── MODAL ── */
+    .overlay { position:fixed; inset:0; background:rgba(42,58,90,.8); z-index:200; display:none; align-items:center; justify-content:center; padding:20px; }
+    .overlay.open { display:flex; }
+    .modal { background:white; border:4px solid var(--navy); box-shadow:10px 10px 0 var(--accent); padding:28px; max-width:520px; width:100%; max-height:90vh; overflow-y:auto; }
+    .modal-title { font-family:'Press Start 2P',cursive; font-size:.6rem; color:var(--navy); margin-bottom:18px; }
+    .mg { display:grid; grid-template-columns:1fr 1fr; gap:12px; margin-bottom:16px; }
+    .mf span:first-child { display:block; font-size:.7rem; color:var(--muted); margin-bottom:3px; }
+    .mf span:last-child { font-weight:600; font-size:.88rem; }
+    .mdetail { background:var(--bg); border:2px solid #d0d8e8; padding:12px; font-size:.82rem; line-height:1.65; margin-bottom:14px; }
+    .mbtns { display:flex; gap:8px; flex-wrap:wrap; margin-top:14px; }
+    .mbtn { padding:10px 18px; font-family:'Press Start 2P',cursive; font-size:.46rem; border:2px solid var(--navy); cursor:pointer; transition:all .15s; }
+    .mbtn-p { background:var(--navy); color:white; }
+    .mbtn-p:hover { background:var(--accent); color:var(--navy); }
+    .mbtn-s { background:white; color:var(--navy); }
+    .mbtn-s:hover { background:var(--bg); }
 
-        /* status / payment selects */
-        .inline-select {
-            padding:5px 8px; border:2px solid #d0d8e8; font-family:'Poppins',sans-serif;
-            font-size:0.78rem; color:var(--primary); background:white; cursor:pointer; outline:none;
-            transition:border-color 0.15s; max-width:140px;
-        }
-        .inline-select:focus { border-color:var(--primary); }
+    .svc-form label { display:block; font-size:.8rem; font-weight:600; margin-bottom:5px; }
+    .svc-form input, .svc-form select, .svc-form textarea { width:100%; padding:10px 14px; border:2px solid #d0d8e8; font-family:'Poppins',sans-serif; font-size:.88rem; outline:none; margin-bottom:13px; transition:border-color .15s; }
+    .svc-form input:focus, .svc-form select:focus, .svc-form textarea:focus { border-color:var(--navy); }
+    .sf-row { display:grid; grid-template-columns:1fr 1fr; gap:12px; }
 
-        .badge {
-            display:inline-block; padding:3px 9px; font-family:'Press Start 2P',cursive; font-size:0.38rem;
-            border:2px solid var(--primary); white-space:nowrap;
-        }
-        .badge-baru     { background:#fff9c4; }
-        .badge-progress { background:#bbdefb; }
-        .badge-review   { background:#ffe0b2; }
-        .badge-done     { background:#c8e6c9; }
-        .badge-unpaid   { background:#ffcdd2; }
-        .badge-dp       { background:#fff9c4; }
-        .badge-lunas    { background:#c8e6c9; }
+    /* ── TOAST ── */
+    #toast { position:fixed; bottom:24px; right:24px; z-index:300; background:var(--navy); color:white; padding:12px 20px; font-size:.82rem; border-left:4px solid var(--accent); box-shadow:5px 5px 0 rgba(42,58,90,.25); transform:translateY(70px); transition:transform .3s; pointer-events:none; }
+    #toast.show { transform:translateY(0); }
 
-        .action-btns { display:flex; gap:6px; flex-wrap:nowrap; }
-        .btn-act {
-            padding:5px 10px; font-family:'Press Start 2P',cursive; font-size:0.38rem;
-            border:2px solid var(--primary); background:white; color:var(--primary); cursor:pointer; transition:all 0.15s; white-space:nowrap;
-        }
-        .btn-act:hover { background:var(--primary); color:var(--accent); }
-        .btn-act-danger { border-color:#e53935; color:#e53935; }
-        .btn-act-danger:hover { background:#e53935; color:white; }
-        .btn-act-wa { border-color:#25d366; color:#25d366; }
-        .btn-act-wa:hover { background:#25d366; color:white; }
-
-        .table-footer { padding:12px 16px; font-size:0.78rem; color:var(--muted); border-top:2px solid var(--bg); }
-
-        /* ── SERVICES GRID ── */
-        .svc-grid { display:grid; grid-template-columns:repeat(auto-fill,minmax(280px,1fr)); gap:16px; }
-        .svc-card {
-            background:white; border:3px solid var(--primary); padding:18px;
-            box-shadow:4px 4px 0 var(--primary); transition:transform 0.15s, box-shadow 0.15s;
-        }
-        .svc-card:hover { transform:translate(-1px,-1px); box-shadow:6px 6px 0 var(--accent); }
-        .svc-cat { font-size:0.68rem; color:var(--muted); font-weight:700; text-transform:uppercase; margin-bottom:5px; }
-        .svc-name { font-weight:700; font-size:0.9rem; margin-bottom:5px; }
-        .svc-price { font-family:'Press Start 2P',cursive; font-size:0.55rem; color:#e67e22; margin-bottom:10px; }
-        .svc-desc { font-size:0.78rem; color:var(--muted); line-height:1.5; margin-bottom:14px; }
-        .svc-actions { display:flex; gap:8px; }
-
-        /* ── REVENUE ── */
-        .rev-row { display:grid; grid-template-columns:repeat(3,1fr); gap:16px; margin-bottom:24px; }
-        .top-svc-list { background:white; border:3px solid var(--primary); padding:20px; box-shadow:5px 5px 0 var(--primary); }
-        .top-svc-title { font-family:'Press Start 2P',cursive; font-size:0.5rem; color:var(--primary); margin-bottom:16px; }
-        .top-svc-row { margin-bottom:12px; }
-        .top-svc-header { display:flex; justify-content:space-between; margin-bottom:4px; font-size:0.8rem; }
-        .top-svc-bar-wrap { height:8px; background:var(--bg); }
-        .top-svc-bar { height:100%; background:var(--primary); transition:width 0.5s; }
-
-        /* ── MODAL ── */
-        .modal-overlay {
-            position:fixed; inset:0; background:rgba(42,58,90,0.75); z-index:200;
-            display:none; align-items:center; justify-content:center; padding:20px;
-        }
-        .modal-overlay.open { display:flex; }
-        .modal-box {
-            background:white; border:4px solid var(--primary); box-shadow:10px 10px 0 var(--accent);
-            padding:32px; max-width:520px; width:100%; max-height:90vh; overflow-y:auto;
-        }
-        .modal-title { font-family:'Press Start 2P',cursive; font-size:0.65rem; color:var(--primary); margin-bottom:20px; }
-        .modal-grid { display:grid; grid-template-columns:1fr 1fr; gap:12px; margin-bottom:16px; }
-        .modal-field span:first-child { display:block; font-size:0.7rem; color:var(--muted); margin-bottom:3px; }
-        .modal-field span:last-child { font-weight:600; font-size:0.9rem; }
-        .modal-detail { background:var(--bg); border:2px solid #d0d8e8; padding:12px; font-size:0.82rem; color:var(--primary); line-height:1.65; margin-bottom:16px; }
-        .modal-files a { display:block; font-size:0.82rem; color:var(--primary); text-decoration:underline; margin-bottom:4px; }
-        .modal-btns { display:flex; gap:10px; flex-wrap:wrap; margin-top:16px; }
-        .btn-modal {
-            padding:10px 18px; font-family:'Press Start 2P',cursive; font-size:0.5rem;
-            border:2px solid var(--primary); cursor:pointer; transition:all 0.15s;
-        }
-        .btn-modal-prim { background:var(--primary); color:white; }
-        .btn-modal-prim:hover { background:var(--accent); color:var(--primary); }
-        .btn-modal-sec { background:white; color:var(--primary); }
-        .btn-modal-sec:hover { background:var(--bg); }
-
-        /* svc form */
-        .svc-form label { display:block; font-size:0.8rem; font-weight:600; margin-bottom:5px; color:var(--primary); }
-        .svc-form input, .svc-form select, .svc-form textarea {
-            width:100%; padding:10px 14px; border:2px solid #d0d8e8; font-family:'Poppins',sans-serif;
-            font-size:0.9rem; outline:none; margin-bottom:14px; transition:border-color 0.15s;
-        }
-        .svc-form input:focus, .svc-form select:focus, .svc-form textarea:focus { border-color:var(--primary); }
-        .svc-form-row { display:grid; grid-template-columns:1fr 1fr; gap:14px; }
-
-        /* ── TOAST ── */
-        #toast {
-            position:fixed; bottom:24px; right:24px; z-index:300;
-            background:var(--primary); color:white; padding:12px 20px;
-            font-size:0.82rem; border-left:4px solid var(--accent);
-            box-shadow:5px 5px 0 rgba(42,58,90,0.3);
-            transform:translateY(80px); transition:transform 0.3s; pointer-events:none;
-        }
-        #toast.show { transform:translateY(0); }
-
-        /* ── RESPONSIVE ── */
-        @media(max-width:900px) {
-            .sidebar { display:none; }
-            .main-area { margin-left:0; }
-            .stats-row { grid-template-columns:1fr 1fr; }
-            .rev-row { grid-template-columns:1fr; }
-        }
-        @media(max-width:600px) {
-            .stats-row { grid-template-columns:1fr; }
-            .modal-grid { grid-template-columns:1fr; }
-        }
-    </style>
+    @media(max-width:900px){ .sidebar{display:none;} .main{margin-left:0;} .stats{grid-template-columns:1fr 1fr;} .rev-stats{grid-template-columns:1fr;} }
+    @media(max-width:560px){ .stats{grid-template-columns:1fr;} .mg{grid-template-columns:1fr;} }
+  </style>
 </head>
 <body>
 
-<!-- LOGIN SCREEN -->
-<div id="login-screen">
-    <div class="login-box">
-        <div style="font-family:'Press Start 2P',cursive; font-size:1rem; color:var(--accent); margin-bottom:16px; text-align:center">TD</div>
-        <div class="login-title">ADMIN DASHBOARD</div>
-        <div class="login-sub">Tugasin Digital — Akses terbatas</div>
+<!-- SIDEBAR -->
+<aside class="sidebar">
+  <div class="sb-header">
+    <div class="sb-logo">TUGASIN DIGITAL</div>
+    <div class="sb-sub">Admin Panel</div>
+  </div>
+  <nav class="sb-nav">
+    <div class="sb-sec">MENU</div>
+    <div class="sb-item active" id="nav-orders"   onclick="showSec('orders')"><span class="sb-icon">&#128203;</span>Kelola Order</div>
+    <div class="sb-item"        id="nav-services" onclick="showSec('services')"><span class="sb-icon">&#128722;</span>Layanan</div>
+    <div class="sb-item"        id="nav-revenue"  onclick="showSec('revenue')"><span class="sb-icon">&#128176;</span>Pendapatan</div>
+    <div class="sb-sec">LINK CEPAT</div>
+    <a href="index.html" target="_blank" class="sb-item"><span class="sb-icon">&#127760;</span>Lihat Website</a>
+    <a href="order.html" target="_blank" class="sb-item"><span class="sb-icon">&#43;</span>Buat Order</a>
+    <a href="track.html" target="_blank" class="sb-item"><span class="sb-icon">&#128269;</span>Cek Order</a>
+  </nav>
+  <div class="sb-footer">
+    <div class="sb-email" id="admin-email">admin</div>
+    <button class="btn-logout" onclick="doLogout()">LOGOUT</button>
+  </div>
+</aside>
 
-        <div class="login-error" id="login-error">Email atau password salah.</div>
+<!-- MAIN CONTENT -->
+<div class="main">
 
-        <label>Email Admin</label>
-        <input type="email" id="login-email" placeholder="admin@tugasindigital.com">
-        <label>Password</label>
-        <input type="password" id="login-pass" placeholder="••••••••" onkeydown="if(event.key==='Enter')doLogin()">
-        <button class="btn-login" id="btn-login" onclick="doLogin()">MASUK</button>
-        <a href="index.html" class="back-link">← Kembali ke website</a>
+  <div class="topbar">
+    <span class="topbar-title" id="topbar-title">ORDER MANAGEMENT</span>
+    <div class="topbar-right">
+      <div class="live"></div>
+      <span style="font-size:.78rem;color:var(--muted);">Live</span>
+      <button class="btn-sm" onclick="refresh()">REFRESH</button>
     </div>
-</div>
+  </div>
 
-<!-- DASHBOARD -->
-<div id="dashboard">
-    <div class="sidebar">
-        <div class="sidebar-header">
-            <div class="sidebar-logo">TUGASIN DIGITAL</div>
-            <div class="sidebar-sub">Admin Panel</div>
-        </div>
+  <div class="body">
 
-        <div class="sidebar-section">
-            <div class="sidebar-section-label">MENU</div>
-            <div class="nav-item active" id="nav-orders" onclick="showSection('orders')">
-                <span class="nav-item-icon">&#128203;</span> Kelola Order
-            </div>
-            <div class="nav-item" id="nav-services" onclick="showSection('services')">
-                <span class="nav-item-icon">&#128722;</span> Layanan
-            </div>
-            <div class="nav-item" id="nav-revenue" onclick="showSection('revenue')">
-                <span class="nav-item-icon">&#128176;</span> Pendapatan
-            </div>
-        </div>
+    <!-- ORDERS SECTION -->
+    <div id="sec-orders">
+      <div class="stats">
+        <div class="stat"><div class="stat-lbl">Total Order</div><div class="stat-val" id="s-all">—</div></div>
+        <div class="stat"><div class="stat-lbl">Baru / Pending</div><div class="stat-val acc" id="s-new">—</div></div>
+        <div class="stat"><div class="stat-lbl">In Progress</div><div class="stat-val" id="s-prog">—</div></div>
+        <div class="stat"><div class="stat-lbl">Selesai</div><div class="stat-val" id="s-done">—</div></div>
+      </div>
 
-        <div class="sidebar-section">
-            <div class="sidebar-section-label">LINK CEPAT</div>
-            <a href="index.html" target="_blank" class="nav-item">
-                <span class="nav-item-icon">&#127760;</span> Lihat Website
-            </a>
-            <a href="order.html" target="_blank" class="nav-item">
-                <span class="nav-item-icon">&#43;</span> Buat Order
-            </a>
-        </div>
+      <div class="toolbar">
+        <input type="text" class="search" id="q" placeholder="Cari nama, ID, layanan..." oninput="filterOrders()" />
+        <button class="ftab active" data-s="all"         onclick="setF('all',this)">SEMUA</button>
+        <button class="ftab"        data-s="Baru"        onclick="setF('Baru',this)">BARU</button>
+        <button class="ftab"        data-s="In Progress" onclick="setF('In Progress',this)">PROSES</button>
+        <button class="ftab"        data-s="Review"      onclick="setF('Review',this)">REVIEW</button>
+        <button class="ftab"        data-s="Selesai"     onclick="setF('Selesai',this)">SELESAI</button>
+      </div>
 
-        <div class="sidebar-user">
-            <div class="sidebar-user-email" id="admin-email">admin</div>
-            <button class="btn-logout" onclick="doLogout()">LOGOUT</button>
-        </div>
+      <div class="tbl-wrap">
+        <table>
+          <thead>
+            <tr>
+              <th>ID ORDER</th><th>KLIEN</th><th>LAYANAN</th><th>DEADLINE</th>
+              <th>HARGA</th><th>STATUS</th><th>PEMBAYARAN</th><th>AKSI</th>
+            </tr>
+          </thead>
+          <tbody id="tbody">
+            <tr><td colspan="8" style="text-align:center;padding:28px;color:var(--muted);">Memuat data...</td></tr>
+          </tbody>
+        </table>
+        <div class="tbl-foot" id="tbl-foot"></div>
+      </div>
     </div>
 
-    <div class="main-area">
-        <div class="topbar">
-            <span class="topbar-title" id="topbar-title">ORDER MANAGEMENT</span>
-            <div class="topbar-right">
-                <div class="live-dot"></div>
-                <span style="font-size:0.75rem; color:var(--muted)">Live</span>
-                <button class="btn-sm btn-sm-outline" onclick="refreshData()">REFRESH</button>
-            </div>
-        </div>
-
-        <div class="page-body">
-
-            <!-- ORDERS SECTION -->
-            <div id="section-orders">
-                <div class="stats-row">
-                    <div class="stat-card"><div class="stat-label">Total Order</div><div class="stat-val" id="s-total">—</div><div class="stat-sub">Semua waktu</div></div>
-                    <div class="stat-card"><div class="stat-label">Pending / Baru</div><div class="stat-val accent" id="s-pending">—</div><div class="stat-sub">Perlu diproses</div></div>
-                    <div class="stat-card"><div class="stat-label">In Progress</div><div class="stat-val" id="s-progress">—</div><div class="stat-sub">Sedang dikerjakan</div></div>
-                    <div class="stat-card"><div class="stat-label">Selesai</div><div class="stat-val" id="s-done">—</div><div class="stat-sub">Order lunas</div></div>
-                </div>
-
-                <div class="toolbar">
-                    <input type="text" class="search-input" id="search-q" placeholder="Cari nama, ID, layanan..." oninput="filterOrders()">
-                    <div class="filter-tabs">
-                        <button class="ftab active" data-s="all"         onclick="setFilter('all',this)">SEMUA</button>
-                        <button class="ftab" data-s="Baru"               onclick="setFilter('Baru',this)">BARU</button>
-                        <button class="ftab" data-s="In Progress"        onclick="setFilter('In Progress',this)">PROSES</button>
-                        <button class="ftab" data-s="Review"             onclick="setFilter('Review',this)">REVIEW</button>
-                        <button class="ftab" data-s="Selesai"            onclick="setFilter('Selesai',this)">SELESAI</button>
-                    </div>
-                </div>
-
-                <div class="table-wrap">
-                    <table>
-                        <thead>
-                            <tr>
-                                <th>ID ORDER</th>
-                                <th>KLIEN</th>
-                                <th>LAYANAN</th>
-                                <th>DEADLINE</th>
-                                <th>HARGA</th>
-                                <th>STATUS</th>
-                                <th>PEMBAYARAN</th>
-                                <th>AKSI</th>
-                            </tr>
-                        </thead>
-                        <tbody id="orders-tbody">
-                            <tr><td colspan="8" style="text-align:center; padding:32px; color:var(--muted)">Memuat data...</td></tr>
-                        </tbody>
-                    </table>
-                    <div class="table-footer" id="table-footer"></div>
-                </div>
-            </div>
-
-            <!-- SERVICES SECTION -->
-            <div id="section-services" class="section-hidden">
-                <div class="toolbar" style="margin-bottom:20px; justify-content:space-between">
-                    <span style="font-family:'Press Start 2P',cursive; font-size:0.55rem">DAFTAR LAYANAN</span>
-                    <button class="btn-sm btn-sm-accent" onclick="openSvcModal()">+ TAMBAH LAYANAN</button>
-                </div>
-                <div class="svc-grid" id="svc-grid">
-                    <div style="color:var(--muted); font-size:0.85rem; padding:20px">Memuat layanan...</div>
-                </div>
-            </div>
-
-            <!-- REVENUE SECTION -->
-            <div id="section-revenue" class="section-hidden">
-                <div class="rev-row">
-                    <div class="stat-card"><div class="stat-label">Total Lunas</div><div class="stat-val" id="r-lunas" style="font-size:1rem">—</div></div>
-                    <div class="stat-card"><div class="stat-label">DP Masuk (est.)</div><div class="stat-val" id="r-dp" style="font-size:1rem">—</div></div>
-                    <div class="stat-card"><div class="stat-label">Order Belum Bayar</div><div class="stat-val accent" id="r-unpaid" style="font-size:1rem">—</div></div>
-                </div>
-                <div class="top-svc-list">
-                    <div class="top-svc-title">TOP LAYANAN (by order)</div>
-                    <div id="top-svc-content"></div>
-                </div>
-            </div>
-
-        </div>
+    <!-- SERVICES SECTION -->
+    <div id="sec-services" class="section-hidden">
+      <div class="toolbar" style="justify-content:space-between;margin-bottom:20px;">
+        <span class="pixel" style="font-size:.52rem;">DAFTAR LAYANAN</span>
+        <button class="btn-sm btn-sm-acc" onclick="openSvc()">+ TAMBAH LAYANAN</button>
+      </div>
+      <div class="svc-grid" id="svc-grid"><p style="color:var(--muted);font-size:.85rem;padding:20px;">Memuat...</p></div>
     </div>
+
+    <!-- REVENUE SECTION -->
+    <div id="sec-revenue" class="section-hidden">
+      <div class="rev-stats">
+        <div class="stat"><div class="stat-lbl">Total Lunas</div><div class="stat-val" id="r-lunas" style="font-size:.95rem;">—</div></div>
+        <div class="stat"><div class="stat-lbl">DP Masuk (est.)</div><div class="stat-val" id="r-dp" style="font-size:.95rem;">—</div></div>
+        <div class="stat"><div class="stat-lbl">Belum Bayar</div><div class="stat-val acc" id="r-unpaid" style="font-size:.95rem;">—</div></div>
+      </div>
+      <div style="background:white;border:3px solid var(--navy);padding:20px;box-shadow:5px 5px 0 var(--navy);">
+        <div class="pixel" style="font-size:.48rem;color:var(--navy);margin-bottom:16px;">TOP LAYANAN (by order)</div>
+        <div id="top-svc"></div>
+      </div>
+    </div>
+
+  </div>
 </div>
 
 <!-- ORDER DETAIL MODAL -->
-<div class="modal-overlay" id="modal-order">
-    <div class="modal-box">
-        <div class="modal-title" id="modal-order-title">DETAIL ORDER</div>
-        <div id="modal-order-body"></div>
-        <div class="modal-btns">
-            <button class="btn-modal btn-modal-prim" onclick="closeModal('modal-order')">TUTUP</button>
-        </div>
-    </div>
+<div class="overlay" id="o-modal">
+  <div class="modal">
+    <div class="modal-title">DETAIL ORDER</div>
+    <div id="o-modal-body"></div>
+    <div class="mbtns"><button class="mbtn mbtn-p" onclick="closeM('o-modal')">TUTUP</button></div>
+  </div>
 </div>
 
-<!-- SERVICE ADD/EDIT MODAL -->
-<div class="modal-overlay" id="modal-svc">
-    <div class="modal-box">
-        <div class="modal-title" id="modal-svc-title">TAMBAH LAYANAN</div>
-        <form class="svc-form" id="svc-form">
-            <input type="hidden" id="svc-id">
-            <label>Nama Layanan *</label>
-            <input type="text" id="svc-name" placeholder="Contoh: Esai & Makalah" required>
-            <label>Kategori *</label>
-            <select id="svc-cat" required>
-                <option value="">-- Pilih --</option>
-                <option>Tugas Akademik</option>
-                <option>Desain Visual</option>
-                <option>Pemrograman</option>
-                <option>Organisasi</option>
-                <option>Dokumen Bisnis</option>
-                <option>Bundling</option>
-            </select>
-            <div class="svc-form-row">
-                <div><label>Harga Min (Rp)</label><input type="number" id="svc-min" placeholder="35000"></div>
-                <div><label>Harga Max (Rp)</label><input type="number" id="svc-max" placeholder="300000"></div>
-            </div>
-            <label>Deskripsi</label>
-            <textarea id="svc-desc" rows="3" placeholder="Deskripsi singkat layanan"></textarea>
-            <div class="modal-btns">
-                <button type="submit" class="btn-modal btn-modal-prim">SIMPAN</button>
-                <button type="button" class="btn-modal btn-modal-sec" onclick="closeModal('modal-svc')">BATAL</button>
-            </div>
-        </form>
-    </div>
+<!-- SERVICE MODAL -->
+<div class="overlay" id="s-modal">
+  <div class="modal">
+    <div class="modal-title" id="s-modal-title">TAMBAH LAYANAN</div>
+    <form class="svc-form" id="svc-form">
+      <input type="hidden" id="svc-id" />
+      <label>Nama Layanan *</label>
+      <input type="text" id="svc-name" placeholder="Esai & Makalah" required />
+      <label>Kategori *</label>
+      <select id="svc-cat" required>
+        <option value="">-- Pilih --</option>
+        <option>Tugas Akademik</option><option>Desain Visual</option>
+        <option>Pemrograman</option><option>Organisasi</option>
+        <option>Dokumen Bisnis</option><option>Bundling</option>
+      </select>
+      <div class="sf-row">
+        <div><label>Harga Min (Rp)</label><input type="number" id="svc-min" placeholder="35000" /></div>
+        <div><label>Harga Max (Rp)</label><input type="number" id="svc-max" placeholder="300000" /></div>
+      </div>
+      <label>Deskripsi</label>
+      <textarea id="svc-desc" rows="3" placeholder="Deskripsi singkat layanan"></textarea>
+      <div class="mbtns">
+        <button type="submit" class="mbtn mbtn-p">SIMPAN</button>
+        <button type="button" class="mbtn mbtn-s" onclick="closeM('s-modal')">BATAL</button>
+      </div>
+    </form>
+  </div>
 </div>
 
-<!-- TOAST -->
 <div id="toast"></div>
 
 <script>
-    const _URL = "https://zopnowgdpheylnvzjrlb.supabase.co";
-    const _KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InpvcG5vd2dkcGhleWxudnpqcmxiIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzM4MTE2MzAsImV4cCI6MjA4OTM4NzYzMH0.9VomavT2pF6vvjzVhC5HQVCMTidTesukGAqAnPC8UyI";
-    const db = supabase.createClient(_URL, _KEY);
+  const _URL = "https://zopnowgdpheylnvzjrlb.supabase.co";
+  const _KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InpvcG5vd2dkcGhleWxudnpqcmxiIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzM4MTE2MzAsImV4cCI6MjA4OTM4NzYzMH0.9VomavT2pF6vvjzVhC5HQVCMTidTesukGAqAnPC8UyI";
+  const db = supabase.createClient(_URL, _KEY);
 
-    let allOrders = [];
-    let currentFilter = 'all';
+  let orders = [], svcs = [], curFilter = 'all';
 
-    // ══ AUTH ══
-    async function checkSession() {
-        const { data: { session } } = await db.auth.getSession();
-        if (session) bootDashboard(session.user.email);
-    }
+  // ── AUTH ──
+  async function init() {
+    const { data: { session } } = await db.auth.getSession();
+    if (!session) { location.replace('login.html'); return; }
+    document.getElementById('admin-email').textContent = session.user.email;
+    loadOrders(); loadSvcs();
+  }
 
-    async function doLogin() {
-        const email = document.getElementById('login-email').value.trim();
-        const pass  = document.getElementById('login-pass').value;
-        const btn   = document.getElementById('btn-login');
-        const err   = document.getElementById('login-error');
-        btn.disabled = true; btn.textContent = 'MASUK...'; err.style.display = 'none';
+  async function doLogout() {
+    await db.auth.signOut();
+    location.replace('login.html');
+  }
 
-        const { data, error } = await db.auth.signInWithPassword({ email, password: pass });
-        if (error) {
-            err.style.display = 'block';
-        } else {
-            bootDashboard(data.user.email);
-        }
-        btn.disabled = false; btn.textContent = 'MASUK';
-    }
-
-    async function doLogout() {
-        await db.auth.signOut();
-        document.getElementById('dashboard').style.display = 'none';
-        document.getElementById('login-screen').style.display = 'flex';
-    }
-
-    function bootDashboard(email) {
-        document.getElementById('login-screen').style.display = 'none';
-        document.getElementById('dashboard').style.display = 'block';
-        document.getElementById('admin-email').textContent = email;
-        loadOrders();
-        loadServices();
-    }
-
-    // ══ NAVIGATION ══
-    function showSection(name) {
-        ['orders','services','revenue'].forEach(s => {
-            document.getElementById(`section-${s}`).classList.toggle('section-hidden', s !== name);
-            document.getElementById(`nav-${s}`).classList.toggle('active', s === name);
-        });
-        const titles = { orders:'ORDER MANAGEMENT', services:'MANAJEMEN LAYANAN', revenue:'RINGKASAN PENDAPATAN' };
-        document.getElementById('topbar-title').textContent = titles[name];
-        if (name === 'revenue') calcRevenue();
-    }
-
-    function refreshData() { loadOrders(); loadServices(); toast('Data diperbarui'); }
-
-    // ══ ORDERS ══
-    async function loadOrders() {
-        const tbody = document.getElementById('orders-tbody');
-        tbody.innerHTML = '<tr><td colspan="8" style="text-align:center;padding:28px;color:var(--muted)">Memuat data...</td></tr>';
-        try {
-            const { data, error } = await db.from('orders').select('*').order('id', { ascending: false });
-            if (error) throw error;
-            allOrders = data || [];
-        } catch {
-            allOrders = [];
-            toast('Gagal memuat data orders');
-        }
-        updateStats();
-        filterOrders();
-    }
-
-    function updateStats() {
-        document.getElementById('s-total').textContent    = allOrders.length;
-        document.getElementById('s-pending').textContent  = allOrders.filter(o => o.status === 'Baru' || o.status === 'Pending').length;
-        document.getElementById('s-progress').textContent = allOrders.filter(o => o.status === 'In Progress').length;
-        document.getElementById('s-done').textContent     = allOrders.filter(o => o.status === 'Selesai').length;
-    }
-
-    function setFilter(s, btn) {
-        currentFilter = s;
-        document.querySelectorAll('.ftab').forEach(b => b.classList.remove('active'));
-        btn.classList.add('active');
-        filterOrders();
-    }
-
-    function filterOrders() {
-        const q = (document.getElementById('search-q').value || '').toLowerCase();
-        let list = allOrders;
-        if (currentFilter !== 'all') list = list.filter(o => o.status === currentFilter);
-        if (q) list = list.filter(o =>
-            (o.customer_name||'').toLowerCase().includes(q) ||
-            (o.order_id||'').toLowerCase().includes(q) ||
-            (o.service_name||'').toLowerCase().includes(q)
-        );
-        renderOrders(list);
-        document.getElementById('table-footer').textContent = `Menampilkan ${list.length} dari ${allOrders.length} order`;
-    }
-
-    function renderOrders(list) {
-        const tbody = document.getElementById('orders-tbody');
-        if (!list.length) {
-            tbody.innerHTML = '<tr><td colspan="8" style="text-align:center;padding:28px;color:var(--muted)">Tidak ada order ditemukan</td></tr>';
-            return;
-        }
-        const sBadge = { 'Baru':'badge-baru','Pending':'badge-baru','In Progress':'badge-progress','Review':'badge-review','Selesai':'badge-done' };
-        const pBadge = { 'Belum Bayar':'badge-unpaid','DP 50%':'badge-dp','Lunas':'badge-lunas' };
-
-        tbody.innerHTML = list.map(o => `
-            <tr>
-                <td class="td-id">${o.order_id || '-'}</td>
-                <td>
-                    <div class="td-name">${o.customer_name || '-'}</div>
-                    <div class="td-wa">${o.whatsapp || ''}</div>
-                </td>
-                <td style="max-width:160px; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; font-size:0.8rem">${o.service_name || '-'}</td>
-                <td style="font-size:0.78rem; color:var(--muted)">${o.deadline || '-'}</td>
-                <td style="color:#e67e22; font-weight:600; font-size:0.82rem">${o.price ? 'Rp '+Number(o.price).toLocaleString('id-ID') : '-'}</td>
-                <td>
-                    <select class="inline-select" onchange="updateOrderField(${o.id},'status',this.value)">
-                        ${['Baru','In Progress','Review','Selesai'].map(s => `<option value="${s}" ${o.status===s?'selected':''}>${s}</option>`).join('')}
-                    </select>
-                </td>
-                <td>
-                    <select class="inline-select" onchange="updateOrderField(${o.id},'payment_status',this.value)">
-                        ${['Belum Bayar','DP 50%','Lunas'].map(s => `<option value="${s}" ${o.payment_status===s?'selected':''}>${s}</option>`).join('')}
-                    </select>
-                </td>
-                <td>
-                    <div class="action-btns">
-                        <button class="btn-act" onclick="viewOrder(${o.id})">DETAIL</button>
-                        <a href="https://wa.me/${o.whatsapp ? '62'+o.whatsapp.replace(/^0/,'') : '6289540108751'}?text=${encodeURIComponent('Halo! Update order '+o.order_id+':')}" target="_blank" class="btn-act btn-act-wa" style="text-decoration:none">WA</a>
-                        <button class="btn-act btn-act-danger" onclick="deleteOrder(${o.id})">HAPUS</button>
-                    </div>
-                </td>
-            </tr>
-        `).join('');
-    }
-
-    async function updateOrderField(id, field, value) {
-        try {
-            const { error } = await db.from('orders').update({ [field]: value }).eq('id', id);
-            if (error) throw error;
-            const idx = allOrders.findIndex(o => o.id === id);
-            if (idx !== -1) allOrders[idx][field] = value;
-            updateStats();
-            toast(`${field === 'status' ? 'Status' : 'Pembayaran'} diperbarui`);
-        } catch (err) { toast('Gagal update: ' + err.message); }
-    }
-
-    function viewOrder(id) {
-        const o = allOrders.find(o => o.id === id);
-        if (!o) return;
-        const filesHtml = o.file_urls
-            ? o.file_urls.split(',').map(u => u.trim()).filter(Boolean).map((u,i) => `<a href="${u}" target="_blank">File ${i+1}: ${u.split('/').pop()}</a>`).join('')
-            : '<span style="color:var(--muted); font-size:0.82rem">Tidak ada file</span>';
-
-        document.getElementById('modal-order-body').innerHTML = `
-            <div class="modal-grid">
-                <div class="modal-field"><span>ID Order</span><span style="font-family:'Press Start 2P',cursive; font-size:0.6rem">${o.order_id}</span></div>
-                <div class="modal-field"><span>Nama</span><span>${o.customer_name}</span></div>
-                <div class="modal-field"><span>WhatsApp</span><span>${o.whatsapp}</span></div>
-                <div class="modal-field"><span>Layanan</span><span>${o.service_name}</span></div>
-                <div class="modal-field"><span>Deadline</span><span>${o.deadline || '-'}</span></div>
-                <div class="modal-field"><span>Harga</span><span style="color:#e67e22">${o.price ? 'Rp '+Number(o.price).toLocaleString('id-ID') : '-'}</span></div>
-                <div class="modal-field"><span>Status</span><span>${o.status || '-'}</span></div>
-                <div class="modal-field"><span>Pembayaran</span><span>${o.payment_status || '-'}</span></div>
-                <div class="modal-field"><span>Tanggal Order</span><span>${o.created_at ? new Date(o.created_at).toLocaleString('id-ID') : '-'}</span></div>
-            </div>
-            <div style="font-size:0.72rem; color:var(--muted); margin-bottom:4px">Detail Request</div>
-            <div class="modal-detail">${o.detail_request || '-'}</div>
-            <div style="font-size:0.72rem; color:var(--muted); margin-bottom:6px">File Referensi</div>
-            <div class="modal-files">${filesHtml}</div>
-        `;
-        document.getElementById('modal-order').classList.add('open');
-    }
-
-    async function deleteOrder(id) {
-        if (!confirm('Hapus order ini secara permanen?')) return;
-        try {
-            const { error } = await db.from('orders').delete().eq('id', id);
-            if (error) throw error;
-            allOrders = allOrders.filter(o => o.id !== id);
-            updateStats(); filterOrders();
-            toast('Order dihapus');
-        } catch (err) { toast('Gagal hapus: ' + err.message); }
-    }
-
-    // ══ SERVICES ══
-    let allServices = [];
-
-    async function loadServices() {
-        const grid = document.getElementById('svc-grid');
-        try {
-            const { data, error } = await db.from('services').select('*').order('id');
-            if (error) throw error;
-            allServices = data || [];
-            renderServices();
-        } catch {
-            grid.innerHTML = '<div style="color:var(--muted); font-size:0.85rem; padding:20px">Gagal memuat layanan.</div>';
-        }
-    }
-
-    function renderServices() {
-        const grid = document.getElementById('svc-grid');
-        if (!allServices.length) {
-            grid.innerHTML = '<div style="color:var(--muted); font-size:0.85rem; padding:20px">Belum ada layanan. Klik "+ Tambah Layanan" untuk mulai.</div>';
-            return;
-        }
-        grid.innerHTML = allServices.map(s => `
-            <div class="svc-card">
-                <div class="svc-cat">${s.category}</div>
-                <div class="svc-name">${s.service_name}</div>
-                <div class="svc-price">Rp ${Math.round(s.price_min/1000)}K – ${Math.round(s.price_max/1000)}K</div>
-                <div class="svc-desc">${s.description || '-'}</div>
-                <div class="svc-actions">
-                    <button class="btn-act" onclick="openSvcModal(${s.id})">EDIT</button>
-                    <button class="btn-act btn-act-danger" onclick="deleteSvc(${s.id})">HAPUS</button>
-                </div>
-            </div>
-        `).join('');
-    }
-
-    function openSvcModal(id) {
-        const s = id ? allServices.find(s => s.id === id) : null;
-        document.getElementById('modal-svc-title').textContent = s ? 'EDIT LAYANAN' : 'TAMBAH LAYANAN';
-        document.getElementById('svc-id').value   = s?.id || '';
-        document.getElementById('svc-name').value = s?.service_name || '';
-        document.getElementById('svc-cat').value  = s?.category || '';
-        document.getElementById('svc-min').value  = s?.price_min || '';
-        document.getElementById('svc-max').value  = s?.price_max || '';
-        document.getElementById('svc-desc').value = s?.description || '';
-        document.getElementById('modal-svc').classList.add('open');
-    }
-
-    document.getElementById('svc-form').addEventListener('submit', async e => {
-        e.preventDefault();
-        const id = document.getElementById('svc-id').value;
-        const payload = {
-            service_name: document.getElementById('svc-name').value.trim(),
-            category:     document.getElementById('svc-cat').value,
-            price_min:    parseInt(document.getElementById('svc-min').value) || 0,
-            price_max:    parseInt(document.getElementById('svc-max').value) || 0,
-            description:  document.getElementById('svc-desc').value.trim(),
-        };
-        try {
-            if (id) {
-                const { error } = await db.from('services').update(payload).eq('id', id);
-                if (error) throw error;
-                toast('Layanan diperbarui');
-            } else {
-                const { error } = await db.from('services').insert([payload]);
-                if (error) throw error;
-                toast('Layanan ditambahkan');
-            }
-            closeModal('modal-svc');
-            loadServices();
-        } catch (err) { toast('Error: ' + err.message); }
+  // ── NAV ──
+  function showSec(name) {
+    ['orders','services','revenue'].forEach(s => {
+      document.getElementById(`sec-${s}`).classList.toggle('section-hidden', s !== name);
+      document.getElementById(`nav-${s}`).classList.toggle('active', s === name);
     });
+    const titles = { orders:'ORDER MANAGEMENT', services:'MANAJEMEN LAYANAN', revenue:'RINGKASAN PENDAPATAN' };
+    document.getElementById('topbar-title').textContent = titles[name];
+    if (name === 'revenue') calcRev();
+  }
 
-    async function deleteSvc(id) {
-        if (!confirm('Hapus layanan ini?')) return;
-        try {
-            const { error } = await db.from('services').delete().eq('id', id);
-            if (error) throw error;
-            toast('Layanan dihapus');
-            loadServices();
-        } catch (err) { toast('Gagal: ' + err.message); }
+  function refresh() { loadOrders(); loadSvcs(); toast('Data diperbarui'); }
+
+  // ── ORDERS ──
+  async function loadOrders() {
+    const tbody = document.getElementById('tbody');
+    tbody.innerHTML = '<tr><td colspan="8" style="text-align:center;padding:28px;color:var(--muted);">Memuat data...</td></tr>';
+    try {
+      const { data, error } = await db.from('orders').select('*').order('id',{ascending:false});
+      if (error) throw error;
+      orders = data || [];
+    } catch { orders = []; toast('Gagal memuat orders'); }
+    updateStats(); filterOrders();
+  }
+
+  function updateStats() {
+    document.getElementById('s-all').textContent  = orders.length;
+    document.getElementById('s-new').textContent  = orders.filter(o => o.status==='Baru'||o.status==='Pending').length;
+    document.getElementById('s-prog').textContent = orders.filter(o => o.status==='In Progress').length;
+    document.getElementById('s-done').textContent = orders.filter(o => o.status==='Selesai').length;
+  }
+
+  function setF(s, btn) {
+    curFilter = s;
+    document.querySelectorAll('.ftab').forEach(b => b.classList.remove('active'));
+    btn.classList.add('active');
+    filterOrders();
+  }
+
+  function filterOrders() {
+    const q = (document.getElementById('q').value || '').toLowerCase();
+    let list = orders;
+    if (curFilter !== 'all') list = list.filter(o => o.status === curFilter);
+    if (q) list = list.filter(o =>
+      (o.customer_name||'').toLowerCase().includes(q) ||
+      (o.order_id||'').toLowerCase().includes(q) ||
+      (o.service_name||'').toLowerCase().includes(q)
+    );
+    renderOrders(list);
+    document.getElementById('tbl-foot').textContent = `Menampilkan ${list.length} dari ${orders.length} order`;
+  }
+
+  function renderOrders(list) {
+    const tbody = document.getElementById('tbody');
+    if (!list.length) {
+      tbody.innerHTML = '<tr><td colspan="8" style="text-align:center;padding:28px;color:var(--muted);">Tidak ada order ditemukan.</td></tr>';
+      return;
     }
+    tbody.innerHTML = list.map(o => `
+      <tr>
+        <td class="td-id">${o.order_id||'-'}</td>
+        <td><div style="font-weight:700;">${o.customer_name||'-'}</div><div style="font-size:.72rem;color:var(--muted);">${o.whatsapp||''}</div></td>
+        <td style="max-width:150px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;font-size:.8rem;">${o.service_name||'-'}</td>
+        <td style="font-size:.78rem;color:var(--muted);white-space:nowrap;">${o.deadline||'-'}</td>
+        <td style="color:#e67e22;font-weight:600;">${o.price?'Rp '+Number(o.price).toLocaleString('id-ID'):'-'}</td>
+        <td>
+          <select class="sel" onchange="updField(${o.id},'status',this.value)">
+            ${['Baru','In Progress','Review','Selesai'].map(s=>`<option value="${s}" ${o.status===s?'selected':''}>${s}</option>`).join('')}
+          </select>
+        </td>
+        <td>
+          <select class="sel" onchange="updField(${o.id},'payment_status',this.value)">
+            ${['Belum Bayar','DP 50%','Lunas'].map(s=>`<option value="${s}" ${o.payment_status===s?'selected':''}>${s}</option>`).join('')}
+          </select>
+        </td>
+        <td>
+          <div class="act-btns">
+            <button class="act" onclick="viewOrder(${o.id})">DETAIL</button>
+            <a href="https://wa.me/${o.whatsapp?'62'+o.whatsapp.replace(/^0/,''):'6289540108751'}?text=${encodeURIComponent('Halo! Update order '+o.order_id+':')}" target="_blank" class="act act-wa" style="text-decoration:none;">WA</a>
+            <button class="act act-del" onclick="delOrder(${o.id})">HAPUS</button>
+          </div>
+        </td>
+      </tr>`).join('');
+  }
 
-    // ══ REVENUE ══
-    function calcRevenue() {
-        const lunas  = allOrders.filter(o => o.payment_status === 'Lunas').reduce((s,o) => s + (o.price||0), 0);
-        const dp     = allOrders.filter(o => o.payment_status === 'DP 50%').reduce((s,o) => s + ((o.price||0)*0.5), 0);
-        const unpaid = allOrders.filter(o => o.payment_status === 'Belum Bayar').length;
-        document.getElementById('r-lunas').textContent  = 'Rp ' + lunas.toLocaleString('id-ID');
-        document.getElementById('r-dp').textContent     = 'Rp ' + Math.round(dp).toLocaleString('id-ID');
-        document.getElementById('r-unpaid').textContent = unpaid + ' order';
+  async function updField(id, field, val) {
+    try {
+      const { error } = await db.from('orders').update({ [field]: val }).eq('id', id);
+      if (error) throw error;
+      const i = orders.findIndex(o => o.id === id);
+      if (i !== -1) orders[i][field] = val;
+      updateStats();
+      toast(`${field === 'status' ? 'Status' : 'Pembayaran'} diperbarui`);
+    } catch (e) { toast('Gagal: ' + e.message); }
+  }
 
-        const cnt = {};
-        allOrders.forEach(o => { cnt[o.service_name] = (cnt[o.service_name]||0)+1; });
-        const sorted = Object.entries(cnt).sort((a,b) => b[1]-a[1]).slice(0,5);
-        const max = sorted[0]?.[1] || 1;
-        document.getElementById('top-svc-content').innerHTML = sorted.length
-            ? sorted.map(([name,count]) => `
-                <div class="top-svc-row">
-                    <div class="top-svc-header">
-                        <span>${name}</span>
-                        <span style="font-weight:700">${count} order</span>
-                    </div>
-                    <div class="top-svc-bar-wrap"><div class="top-svc-bar" style="width:${(count/max)*100}%"></div></div>
-                </div>
-            `).join('')
-            : '<p style="color:var(--muted); font-size:0.85rem">Belum ada data.</p>';
-    }
+  function viewOrder(id) {
+    const o = orders.find(o => o.id === id);
+    if (!o) return;
+    const files = o.file_urls
+      ? o.file_urls.split(',').map(u=>u.trim()).filter(Boolean).map((u,i)=>`<a href="${u}" target="_blank" style="display:block;color:var(--navy);font-size:.82rem;margin-bottom:3px;">File ${i+1}: ${u.split('/').pop()}</a>`).join('')
+      : '<span style="font-size:.82rem;color:var(--muted);">Tidak ada file</span>';
 
-    // ══ UTILS ══
-    function closeModal(id) { document.getElementById(id).classList.remove('open'); }
-    document.querySelectorAll('.modal-overlay').forEach(m => m.addEventListener('click', e => { if (e.target===m) m.classList.remove('open'); }));
+    document.getElementById('o-modal-body').innerHTML = `
+      <div class="mg">
+        <div class="mf"><span>ID Order</span><span style="font-family:'Press Start 2P',cursive;font-size:.58rem;">${o.order_id}</span></div>
+        <div class="mf"><span>Nama</span><span>${o.customer_name}</span></div>
+        <div class="mf"><span>WhatsApp</span><span>${o.whatsapp}</span></div>
+        <div class="mf"><span>Layanan</span><span>${o.service_name}</span></div>
+        <div class="mf"><span>Deadline</span><span>${o.deadline||'-'}</span></div>
+        <div class="mf"><span>Harga</span><span style="color:#e67e22;">${o.price?'Rp '+Number(o.price).toLocaleString('id-ID'):'-'}</span></div>
+        <div class="mf"><span>Status</span><span>${o.status||'-'}</span></div>
+        <div class="mf"><span>Pembayaran</span><span>${o.payment_status||'-'}</span></div>
+        <div class="mf"><span>Tanggal</span><span>${o.created_at?new Date(o.created_at).toLocaleString('id-ID'):'-'}</span></div>
+      </div>
+      <div style="font-size:.7rem;color:var(--muted);margin-bottom:4px;">Detail Request</div>
+      <div class="mdetail">${o.detail_request||'-'}</div>
+      <div style="font-size:.7rem;color:var(--muted);margin-bottom:6px;">File Referensi</div>
+      <div>${files}</div>
+      <div class="mbtns" style="margin-top:14px;">
+        <a href="https://wa.me/${o.whatsapp?'62'+o.whatsapp.replace(/^0/,''):'6289540108751'}" target="_blank" style="display:inline-block;background:#25d366;color:white;padding:10px 16px;font-family:'Press Start 2P',cursive;font-size:.45rem;text-decoration:none;border:2px solid var(--navy);">CHAT KLIEN</a>
+        <a href="track.html?id=${o.order_id}" target="_blank" style="display:inline-block;background:var(--bg);color:var(--navy);padding:10px 16px;font-family:'Press Start 2P',cursive;font-size:.45rem;text-decoration:none;border:2px solid var(--navy);">LIHAT TRACKER</a>
+      </div>`;
+    document.getElementById('o-modal').classList.add('open');
+  }
 
-    function toast(msg) {
-        const t = document.getElementById('toast');
-        t.textContent = msg; t.classList.add('show');
-        setTimeout(() => t.classList.remove('show'), 2800);
-    }
+  async function delOrder(id) {
+    if (!confirm('Hapus order ini secara permanen?')) return;
+    try {
+      const { error } = await db.from('orders').delete().eq('id', id);
+      if (error) throw error;
+      orders = orders.filter(o => o.id !== id);
+      updateStats(); filterOrders();
+      toast('Order dihapus');
+    } catch (e) { toast('Gagal: ' + e.message); }
+  }
 
-    // ══ INIT ══
-    checkSession();
+  // ── SERVICES ──
+  async function loadSvcs() {
+    const grid = document.getElementById('svc-grid');
+    try {
+      const { data, error } = await db.from('services').select('*').order('id');
+      if (error) throw error;
+      svcs = data || [];
+      renderSvcs();
+    } catch { grid.innerHTML = '<p style="color:var(--muted);padding:20px;">Gagal memuat layanan.</p>'; }
+  }
+
+  function renderSvcs() {
+    const grid = document.getElementById('svc-grid');
+    if (!svcs.length) { grid.innerHTML = '<p style="color:var(--muted);padding:20px;">Belum ada layanan. Klik "+ Tambah" untuk mulai.</p>'; return; }
+    grid.innerHTML = svcs.map(s => `
+      <div class="svc-card">
+        <div style="font-size:.68rem;font-weight:700;color:var(--muted);text-transform:uppercase;margin-bottom:5px;">${s.category}</div>
+        <div style="font-weight:700;font-size:.9rem;margin-bottom:5px;">${s.service_name}</div>
+        <div class="pixel" style="font-size:.55rem;color:#e67e22;margin-bottom:8px;">Rp ${Math.round(s.price_min/1000)}K – ${Math.round(s.price_max/1000)}K</div>
+        <div style="font-size:.78rem;color:var(--muted);line-height:1.5;margin-bottom:12px;">${s.description||'-'}</div>
+        <div style="display:flex;gap:8px;">
+          <button class="act" onclick="openSvc(${s.id})">EDIT</button>
+          <button class="act act-del" onclick="delSvc(${s.id})">HAPUS</button>
+        </div>
+      </div>`).join('');
+  }
+
+  function openSvc(id) {
+    const s = id ? svcs.find(x => x.id === id) : null;
+    document.getElementById('s-modal-title').textContent = s ? 'EDIT LAYANAN' : 'TAMBAH LAYANAN';
+    document.getElementById('svc-id').value   = s?.id || '';
+    document.getElementById('svc-name').value = s?.service_name || '';
+    document.getElementById('svc-cat').value  = s?.category || '';
+    document.getElementById('svc-min').value  = s?.price_min || '';
+    document.getElementById('svc-max').value  = s?.price_max || '';
+    document.getElementById('svc-desc').value = s?.description || '';
+    document.getElementById('s-modal').classList.add('open');
+  }
+
+  document.getElementById('svc-form').addEventListener('submit', async e => {
+    e.preventDefault();
+    const id = document.getElementById('svc-id').value;
+    const p  = {
+      service_name: document.getElementById('svc-name').value.trim(),
+      category:     document.getElementById('svc-cat').value,
+      price_min:    parseInt(document.getElementById('svc-min').value) || 0,
+      price_max:    parseInt(document.getElementById('svc-max').value) || 0,
+      description:  document.getElementById('svc-desc').value.trim(),
+    };
+    try {
+      if (id) {
+        const { error } = await db.from('services').update(p).eq('id', id);
+        if (error) throw error; toast('Layanan diperbarui');
+      } else {
+        const { error } = await db.from('services').insert([p]);
+        if (error) throw error; toast('Layanan ditambahkan');
+      }
+      closeM('s-modal'); loadSvcs();
+    } catch (e) { toast('Error: ' + e.message); }
+  });
+
+  async function delSvc(id) {
+    if (!confirm('Hapus layanan ini?')) return;
+    try {
+      const { error } = await db.from('services').delete().eq('id', id);
+      if (error) throw error;
+      toast('Layanan dihapus'); loadSvcs();
+    } catch (e) { toast(e.message); }
+  }
+
+  // ── REVENUE ──
+  function calcRev() {
+    const lunas = orders.filter(o => o.payment_status==='Lunas').reduce((s,o) => s+(o.price||0), 0);
+    const dp    = orders.filter(o => o.payment_status==='DP 50%').reduce((s,o) => s+((o.price||0)*.5), 0);
+    const unpaid= orders.filter(o => o.payment_status==='Belum Bayar').length;
+    document.getElementById('r-lunas').textContent  = 'Rp ' + lunas.toLocaleString('id-ID');
+    document.getElementById('r-dp').textContent     = 'Rp ' + Math.round(dp).toLocaleString('id-ID');
+    document.getElementById('r-unpaid').textContent = unpaid + ' order';
+
+    const cnt = {};
+    orders.forEach(o => { cnt[o.service_name] = (cnt[o.service_name]||0)+1; });
+    const sorted = Object.entries(cnt).sort((a,b)=>b[1]-a[1]).slice(0,6);
+    const max = sorted[0]?.[1] || 1;
+    document.getElementById('top-svc').innerHTML = sorted.length
+      ? sorted.map(([name,c]) => `
+        <div style="margin-bottom:12px;">
+          <div style="display:flex;justify-content:space-between;font-size:.82rem;margin-bottom:4px;">
+            <span>${name}</span>
+            <span style="font-weight:700;">${c} order</span>
+          </div>
+          <div class="bar-wrap"><div class="bar-fill" style="width:${(c/max)*100}%"></div></div>
+        </div>`).join('')
+      : '<p style="color:var(--muted);font-size:.85rem;">Belum ada data.</p>';
+  }
+
+  // ── UTILS ──
+  function closeM(id) { document.getElementById(id).classList.remove('open'); }
+  document.querySelectorAll('.overlay').forEach(m => m.addEventListener('click', e => { if(e.target===m) m.classList.remove('open'); }));
+  function toast(msg) { const t = document.getElementById('toast'); t.textContent = msg; t.classList.add('show'); setTimeout(() => t.classList.remove('show'), 2800); }
+
+  init();
 </script>
 </body>
 </html>
