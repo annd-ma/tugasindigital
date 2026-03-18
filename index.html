@@ -1,845 +1,501 @@
 <!DOCTYPE html>
 <html lang="id">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Tugasin Digital | Joki Tugas, Desain & Coding</title>
-    <meta name="description" content="Jasa joki tugas, desain, dan coding terpercaya. Mulai Rp 20K. Fast response, hasil rapi, sesuai brief.">
-    <link href="https://fonts.googleapis.com/css2?family=Press+Start+2P&family=Poppins:wght@400;500;600;700&display=swap" rel="stylesheet">
-    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Tugasin Digital | Joki Tugas, Desain & Coding</title>
+  <meta name="description" content="Jasa joki tugas, desain, dan coding terpercaya. Mulai Rp 20K. Fast response, hasil rapi, sesuai brief." />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link href="https://fonts.googleapis.com/css2?family=Press+Start+2P&family=Poppins:wght@400;500;600;700&display=swap" rel="stylesheet" />
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <style>
+    :root {
+      --navy:   #2a3a5a;
+      --accent: #f4b41a;
+      --bg:     #f0f4f8;
+      --white:  #ffffff;
+      --muted:  #6b7a99;
+    }
+    body { font-family: 'Poppins', sans-serif; background: var(--bg); color: var(--navy); overflow-x: hidden; }
+    .pixel { font-family: 'Press Start 2P', cursive; }
 
-    <style>
-        :root {
-            --primary: #2a3a5a;
-            --accent:  #f4b41a;
-            --bg:      #f0f4f8;
-            --white:   #ffffff;
-            --text:    #2a3a5a;
-            --muted:   #6b7a99;
-            --border:  4px solid var(--primary);
-            --shadow:  8px 8px 0px var(--primary);
-        }
+    /* pixel grid on hero */
+    .hero-grid {
+      background-image:
+        linear-gradient(rgba(244,180,26,.06) 1px, transparent 1px),
+        linear-gradient(90deg, rgba(244,180,26,.06) 1px, transparent 1px);
+      background-size: 28px 28px;
+    }
 
-        * { box-sizing: border-box; margin: 0; padding: 0; }
+    /* pixel border utility */
+    .px-border { border: 3px solid var(--navy); }
+    .px-shadow { box-shadow: 6px 6px 0 var(--navy); }
+    .px-shadow-accent { box-shadow: 6px 6px 0 var(--accent); }
 
-        body {
-            font-family: 'Poppins', sans-serif;
-            background: var(--bg);
-            color: var(--text);
-        }
+    /* card hover */
+    .card-hover { transition: transform .18s, box-shadow .18s; }
+    .card-hover:hover { transform: translate(-3px,-3px); box-shadow: 9px 9px 0 var(--accent) !important; }
 
-        /* ── NAV ── */
-        nav {
-            background: var(--primary);
-            padding: 0 24px;
-            display: flex;
-            align-items: center;
-            justify-content: space-between;
-            height: 56px;
-            position: sticky;
-            top: 0;
-            z-index: 100;
-        }
-        .nav-logo {
-            font-family: 'Press Start 2P', cursive;
-            font-size: 0.65rem;
-            color: var(--accent);
-            text-decoration: none;
-        }
-        .nav-links { display: flex; gap: 8px; align-items: center; }
-        .nav-links a {
-            color: rgba(255,255,255,0.75);
-            text-decoration: none;
-            font-size: 0.75rem;
-            padding: 6px 12px;
-            transition: color 0.15s;
-        }
-        .nav-links a:hover { color: var(--accent); }
-        .nav-btn {
-            background: var(--accent);
-            color: var(--primary) !important;
-            font-family: 'Press Start 2P', cursive;
-            font-size: 0.5rem !important;
-            padding: 8px 14px !important;
-            border: 2px solid var(--primary);
-        }
-        .burger { display: none; background: none; border: none; color: white; font-size: 1.4rem; cursor: pointer; }
+    /* typewriter */
+    .typewriter { overflow: hidden; white-space: nowrap; border-right: 3px solid var(--accent); animation: type 2.4s steps(28,end) forwards, blink .7s step-end infinite; width: 0; }
+    @keyframes type  { to { width: 100%; } }
+    @keyframes blink { 50% { border-color: transparent; } }
 
-        /* ── HERO ── */
-        .hero {
-            background: var(--primary);
-            padding: 80px 24px 60px;
-            text-align: center;
-            position: relative;
-            overflow: hidden;
-        }
-        .hero::before {
-            content: '';
-            position: absolute;
-            inset: 0;
-            background-image:
-                linear-gradient(rgba(244,180,26,0.06) 1px, transparent 1px),
-                linear-gradient(90deg, rgba(244,180,26,0.06) 1px, transparent 1px);
-            background-size: 32px 32px;
-        }
-        .hero-content { position: relative; z-index: 1; max-width: 700px; margin: 0 auto; }
-        .hero-badge {
-            display: inline-block;
-            background: var(--accent);
-            color: var(--primary);
-            font-family: 'Press Start 2P', cursive;
-            font-size: 0.45rem;
-            padding: 6px 14px;
-            border: 2px solid rgba(255,255,255,0.3);
-            margin-bottom: 24px;
-            letter-spacing: 1px;
-        }
-        .hero h1 {
-            font-family: 'Press Start 2P', cursive;
-            font-size: clamp(1.1rem, 3.5vw, 2rem);
-            color: white;
-            line-height: 1.6;
-            margin-bottom: 16px;
-        }
-        .hero h1 span { color: var(--accent); }
-        .hero p {
-            color: rgba(255,255,255,0.65);
-            font-size: 1rem;
-            margin-bottom: 36px;
-        }
-        .hero-cta { display: flex; gap: 12px; justify-content: center; flex-wrap: wrap; }
-        .btn-primary {
-            background: var(--accent);
-            color: var(--primary);
-            font-family: 'Press Start 2P', cursive;
-            font-size: 0.6rem;
-            padding: 14px 24px;
-            border: 3px solid white;
-            text-decoration: none;
-            display: inline-block;
-            box-shadow: 5px 5px 0px rgba(255,255,255,0.3);
-            transition: transform 0.15s, box-shadow 0.15s;
-        }
-        .btn-primary:hover { transform: translate(-2px,-2px); box-shadow: 7px 7px 0px rgba(255,255,255,0.3); }
-        .btn-outline {
-            background: transparent;
-            color: white;
-            font-family: 'Press Start 2P', cursive;
-            font-size: 0.6rem;
-            padding: 14px 24px;
-            border: 3px solid rgba(255,255,255,0.5);
-            text-decoration: none;
-            display: inline-block;
-            transition: border-color 0.15s, color 0.15s;
-        }
-        .btn-outline:hover { border-color: var(--accent); color: var(--accent); }
+    /* marquee */
+    .marquee-wrap { overflow: hidden; }
+    .marquee-track { display: flex; gap: 0; animation: marquee 22s linear infinite; width: max-content; }
+    .marquee-track:hover { animation-play-state: paused; }
+    @keyframes marquee { to { transform: translateX(-50%); } }
 
-        /* ── STATS BAR ── */
-        .stats-bar {
-            background: var(--accent);
-            border-top: 3px solid var(--primary);
-            border-bottom: 3px solid var(--primary);
-            display: flex;
-            justify-content: center;
-            gap: 0;
-        }
-        .stat-item {
-            flex: 1;
-            max-width: 200px;
-            text-align: center;
-            padding: 18px 16px;
-            border-right: 2px solid rgba(42,58,90,0.25);
-        }
-        .stat-item:last-child { border-right: none; }
-        .stat-num {
-            font-family: 'Press Start 2P', cursive;
-            font-size: 1.1rem;
-            color: var(--primary);
-            display: block;
-        }
-        .stat-label { font-size: 0.7rem; color: rgba(42,58,90,0.7); margin-top: 4px; }
+    /* RPG dialog box */
+    .rpg-dialog {
+      background: white;
+      border: 4px solid var(--navy);
+      box-shadow: 6px 6px 0 var(--navy);
+      position: relative;
+    }
+    .rpg-dialog::before {
+      content: '';
+      position: absolute; top: 6px; left: 6px; right: -6px; bottom: -6px;
+      background: rgba(42,58,90,.12);
+      z-index: -1;
+    }
+    .rpg-corner {
+      position: absolute; width: 10px; height: 10px;
+      background: var(--navy);
+    }
+    .rpg-corner.tl { top: -3px; left: -3px; }
+    .rpg-corner.tr { top: -3px; right: -3px; }
+    .rpg-corner.bl { bottom: -3px; left: -3px; }
+    .rpg-corner.br { bottom: -3px; right: -3px; }
 
-        /* ── SECTION WRAPPER ── */
-        section { padding: 64px 24px; }
-        .section-inner { max-width: 1100px; margin: 0 auto; }
-        .section-label {
-            font-family: 'Press Start 2P', cursive;
-            font-size: 0.5rem;
-            color: var(--muted);
-            letter-spacing: 2px;
-            text-transform: uppercase;
-            margin-bottom: 8px;
-        }
-        .section-title {
-            font-family: 'Press Start 2P', cursive;
-            font-size: clamp(0.85rem, 2vw, 1.2rem);
-            color: var(--primary);
-            margin-bottom: 40px;
-            line-height: 1.8;
-        }
+    /* filter tabs */
+    .ftab { font-family: 'Press Start 2P', cursive; font-size: .42rem; padding: 7px 13px; border: 2px solid var(--navy); background: white; color: var(--navy); cursor: pointer; transition: all .15s; }
+    .ftab:hover, .ftab.active { background: var(--navy); color: var(--accent); }
 
-        /* ── FILTER TABS ── */
-        .filter-row { display: flex; flex-wrap: wrap; gap: 8px; margin-bottom: 32px; }
-        .filter-tab {
-            background: white;
-            border: 2px solid var(--primary);
-            color: var(--primary);
-            font-family: 'Press Start 2P', cursive;
-            font-size: 0.42rem;
-            padding: 7px 13px;
-            cursor: pointer;
-            transition: all 0.15s;
-        }
-        .filter-tab:hover, .filter-tab.active {
-            background: var(--primary);
-            color: var(--accent);
-        }
+    /* skeleton */
+    .skeleton { background: linear-gradient(90deg,#e4e9f0 25%,#d0d8e4 50%,#e4e9f0 75%); background-size: 200% 100%; animation: shimmer 1.4s infinite; }
+    @keyframes shimmer { to { background-position: -200% 0; } }
 
-        /* ── SERVICE CARDS ── */
-        .cards-grid {
-            display: grid;
-            grid-template-columns: repeat(auto-fill, minmax(290px, 1fr));
-            gap: 24px;
-        }
-        .card {
-            background: white;
-            border: 4px solid var(--primary);
-            padding: 24px;
-            box-shadow: var(--shadow);
-            transition: transform 0.2s, box-shadow 0.2s;
-            display: flex;
-            flex-direction: column;
-        }
-        .card:hover {
-            transform: translate(-3px, -3px);
-            box-shadow: 11px 11px 0px var(--accent);
-        }
-        .card-category {
-            font-size: 0.65rem;
-            font-weight: 700;
-            color: var(--muted);
-            text-transform: uppercase;
-            letter-spacing: 1px;
-            margin-bottom: 8px;
-        }
-        .card h3 { font-size: 1rem; font-weight: 700; margin-bottom: 8px; }
-        .card p { font-size: 0.82rem; color: var(--muted); flex: 1; margin-bottom: 16px; line-height: 1.6; }
-        .card-price {
-            font-family: 'Press Start 2P', cursive;
-            font-size: 0.7rem;
-            color: #e67e22;
-            margin-bottom: 16px;
-        }
-        .btn-order {
-            display: block;
-            text-align: center;
-            background: var(--primary);
-            color: white;
-            padding: 11px;
-            text-decoration: none;
-            font-weight: 700;
-            font-size: 0.82rem;
-            border: 2px solid var(--primary);
-            transition: background 0.15s, color 0.15s;
-        }
-        .btn-order:hover { background: var(--accent); color: var(--primary); }
+    /* nav */
+    .nav-link { color: rgba(255,255,255,.7); font-size: .8rem; padding: 6px 10px; text-decoration: none; transition: color .15s; }
+    .nav-link:hover { color: var(--accent); }
 
-        /* ── ORDER TRACKER ── */
-        #tracker { background: var(--primary); }
-        .tracker-box {
-            background: white;
-            border: 4px solid var(--accent);
-            box-shadow: 8px 8px 0px var(--accent);
-            padding: 32px;
-            max-width: 640px;
-            margin: 0 auto;
-        }
-        .tracker-box .section-title { color: var(--primary); margin-bottom: 8px; font-size: 0.85rem; }
-        .tracker-box p { color: var(--muted); font-size: 0.85rem; margin-bottom: 20px; }
-        .tracker-input-row { display: flex; gap: 8px; }
-        .tracker-input-row input {
-            flex: 1;
-            padding: 12px 14px;
-            border: 3px solid var(--primary);
-            font-family: 'Poppins', sans-serif;
-            font-size: 0.9rem;
-            outline: none;
-        }
-        .tracker-input-row input:focus { border-color: var(--accent); }
-        .btn-check {
-            background: var(--primary);
-            color: var(--accent);
-            border: 3px solid var(--primary);
-            font-family: 'Press Start 2P', cursive;
-            font-size: 0.5rem;
-            padding: 0 18px;
-            cursor: pointer;
-            white-space: nowrap;
-            transition: background 0.15s;
-        }
-        .btn-check:hover { background: var(--accent); color: var(--primary); }
-        #tracker-result { margin-top: 20px; }
-        .result-card {
-            border: 3px solid var(--primary);
-            padding: 20px;
-            background: var(--bg);
-        }
-        .result-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-bottom: 16px; }
-        .result-item span:first-child { display: block; font-size: 0.7rem; color: var(--muted); margin-bottom: 2px; }
-        .result-item span:last-child { font-weight: 700; font-size: 0.9rem; }
-        .status-pill {
-            display: inline-block;
-            padding: 4px 12px;
-            font-family: 'Press Start 2P', cursive;
-            font-size: 0.45rem;
-            border: 2px solid var(--primary);
-        }
-        .pill-pending  { background: #ffeb3b; }
-        .pill-progress { background: #2196f3; color: white; }
-        .pill-done     { background: #4caf50; color: white; }
-        .pill-review   { background: #ff9800; }
-        .pill-unpaid   { background: #ff5252; color: white; }
-        .pill-dp       { background: #ffeb3b; }
-        .pill-lunas    { background: #4caf50; color: white; }
+    /* section layout */
+    .section { padding: 64px 24px; }
+    .inner { max-width: 1100px; margin: 0 auto; }
+    .sec-label { font-family: 'Press Start 2P', cursive; font-size: .45rem; letter-spacing: 2px; color: var(--muted); margin-bottom: 6px; }
+    .sec-title { font-family: 'Press Start 2P', cursive; font-size: clamp(.85rem,2vw,1.2rem); color: var(--navy); margin-bottom: 36px; line-height: 1.8; }
 
-        /* ── HOW IT WORKS ── */
-        #cara-kerja { background: white; border-top: 4px solid var(--primary); border-bottom: 4px solid var(--primary); }
-        .steps-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 24px; }
-        .step-item { text-align: center; }
-        .step-num {
-            width: 52px; height: 52px;
-            background: var(--primary);
-            color: var(--accent);
-            font-family: 'Press Start 2P', cursive;
-            font-size: 1rem;
-            display: flex; align-items: center; justify-content: center;
-            margin: 0 auto 16px;
-            border: 3px solid var(--primary);
-            box-shadow: 4px 4px 0 var(--accent);
-        }
-        .step-item h4 { font-family: 'Press Start 2P', cursive; font-size: 0.55rem; margin-bottom: 8px; }
-        .step-item p { font-size: 0.82rem; color: var(--muted); line-height: 1.6; }
+    /* step connector */
+    .step-line { flex: 1; height: 3px; background: repeating-linear-gradient(90deg, var(--navy) 0, var(--navy) 6px, transparent 6px, transparent 12px); opacity: .3; }
 
-        /* ── TESTIMONI PREVIEW ── */
-        #testimoni-preview { background: var(--bg); }
-        .testi-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); gap: 20px; }
-        .testi-card {
-            background: white;
-            border: 3px solid var(--primary);
-            padding: 20px;
-            box-shadow: 5px 5px 0 var(--primary);
-            transition: transform 0.2s, box-shadow 0.2s;
-        }
-        .testi-card:hover { transform: translate(-2px,-2px); box-shadow: 7px 7px 0 var(--accent); }
-        .testi-stars { color: var(--accent); font-size: 0.95rem; margin-bottom: 10px; }
-        .testi-text { font-size: 0.85rem; color: var(--text); line-height: 1.65; margin-bottom: 14px; font-style: italic; }
-        .testi-author { display: flex; align-items: center; gap: 10px; }
-        .testi-avatar {
-            width: 36px; height: 36px;
-            background: var(--primary);
-            color: var(--accent);
-            font-family: 'Press Start 2P', cursive;
-            font-size: 0.65rem;
-            display: flex; align-items: center; justify-content: center;
-            flex-shrink: 0;
-        }
-        .testi-name { font-weight: 700; font-size: 0.85rem; }
-        .testi-meta { font-size: 0.72rem; color: var(--muted); }
-        .see-all-row { text-align: center; margin-top: 32px; }
-        .btn-see-all {
-            background: white;
-            color: var(--primary);
-            font-family: 'Press Start 2P', cursive;
-            font-size: 0.55rem;
-            padding: 12px 24px;
-            border: 3px solid var(--primary);
-            box-shadow: 5px 5px 0 var(--primary);
-            text-decoration: none;
-            display: inline-block;
-            transition: all 0.15s;
-        }
-        .btn-see-all:hover { transform: translate(-2px,-2px); box-shadow: 7px 7px 0 var(--accent); }
+    /* faq */
+    .faq-item { border: 3px solid var(--navy); margin-bottom: 6px; }
+    .faq-q { width: 100%; background: white; border: none; padding: 14px 18px; text-align: left; font-family: 'Poppins', sans-serif; font-size: .9rem; font-weight: 600; color: var(--navy); cursor: pointer; display: flex; justify-content: space-between; align-items: center; gap: 12px; transition: background .15s; }
+    .faq-q:hover { background: var(--bg); }
+    .faq-item.open .faq-q { background: var(--navy); color: white; }
+    .faq-icon { font-family: 'Press Start 2P', cursive; font-size: .8rem; color: var(--accent); flex-shrink: 0; }
+    .faq-a { display: none; padding: 0 18px 14px; font-size: .85rem; color: var(--muted); line-height: 1.7; border-top: 2px solid var(--bg); }
+    .faq-item.open .faq-a { display: block; }
 
-        /* ── FAQ ── */
-        #faq { background: white; border-top: 4px solid var(--primary); }
-        .faq-list { max-width: 720px; }
-        .faq-item { border: 3px solid var(--primary); margin-bottom: 8px; }
-        .faq-q {
-            width: 100%;
-            background: white;
-            border: none;
-            padding: 16px 20px;
-            text-align: left;
-            font-family: 'Poppins', sans-serif;
-            font-size: 0.92rem;
-            font-weight: 600;
-            color: var(--primary);
-            cursor: pointer;
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            gap: 16px;
-        }
-        .faq-q:hover { background: var(--bg); }
-        .faq-icon { font-family: 'Press Start 2P', cursive; font-size: 0.8rem; color: var(--accent); flex-shrink: 0; }
-        .faq-a {
-            display: none;
-            padding: 0 20px 16px;
-            font-size: 0.85rem;
-            color: var(--muted);
-            line-height: 1.7;
-            border-top: 2px solid var(--bg);
-        }
-        .faq-item.open .faq-a { display: block; }
-        .faq-item.open .faq-q { background: var(--primary); color: white; }
-        .faq-item.open .faq-icon { color: var(--accent); }
-
-        /* ── CTA BANNER ── */
-        .cta-banner {
-            background: var(--accent);
-            border-top: 4px solid var(--primary);
-            border-bottom: 4px solid var(--primary);
-            padding: 60px 24px;
-            text-align: center;
-        }
-        .cta-banner h2 {
-            font-family: 'Press Start 2P', cursive;
-            font-size: clamp(0.85rem, 2.5vw, 1.3rem);
-            color: var(--primary);
-            margin-bottom: 12px;
-            line-height: 1.7;
-        }
-        .cta-banner p { color: rgba(42,58,90,0.7); margin-bottom: 28px; font-size: 0.95rem; }
-        .cta-btns { display: flex; gap: 12px; justify-content: center; flex-wrap: wrap; }
-        .btn-cta-main {
-            background: var(--primary);
-            color: white;
-            font-family: 'Press Start 2P', cursive;
-            font-size: 0.6rem;
-            padding: 14px 28px;
-            border: 3px solid var(--primary);
-            text-decoration: none;
-            box-shadow: 5px 5px 0 rgba(42,58,90,0.4);
-            transition: all 0.15s;
-        }
-        .btn-cta-main:hover { transform: translate(-2px,-2px); box-shadow: 7px 7px 0 rgba(42,58,90,0.4); }
-        .btn-cta-wa {
-            background: #25d366;
-            color: white;
-            font-family: 'Press Start 2P', cursive;
-            font-size: 0.6rem;
-            padding: 14px 28px;
-            border: 3px solid var(--primary);
-            text-decoration: none;
-            box-shadow: 5px 5px 0 rgba(42,58,90,0.4);
-            transition: all 0.15s;
-        }
-        .btn-cta-wa:hover { transform: translate(-2px,-2px); box-shadow: 7px 7px 0 rgba(42,58,90,0.4); }
-
-        /* ── FOOTER ── */
-        footer {
-            background: var(--primary);
-            padding: 48px 24px 24px;
-            color: rgba(255,255,255,0.65);
-        }
-        .footer-inner { max-width: 1100px; margin: 0 auto; }
-        .footer-grid { display: grid; grid-template-columns: 2fr 1fr 1fr; gap: 40px; margin-bottom: 40px; }
-        .footer-brand { font-family: 'Press Start 2P', cursive; font-size: 0.7rem; color: var(--accent); margin-bottom: 12px; }
-        .footer-desc { font-size: 0.82rem; line-height: 1.7; }
-        .footer-col h4 { font-family: 'Press Start 2P', cursive; font-size: 0.45rem; color: var(--accent); margin-bottom: 12px; letter-spacing: 1px; }
-        .footer-col a { display: block; color: rgba(255,255,255,0.6); text-decoration: none; font-size: 0.82rem; margin-bottom: 6px; transition: color 0.15s; }
-        .footer-col a:hover { color: var(--accent); }
-        .footer-bottom { border-top: 1px solid rgba(255,255,255,0.15); padding-top: 20px; display: flex; justify-content: space-between; align-items: center; flex-wrap: gap; }
-        .footer-bottom p { font-size: 0.75rem; }
-
-        /* ── LOADING SKELETON ── */
-        .skeleton {
-            background: linear-gradient(90deg, #e8edf2 25%, #d0d8e4 50%, #e8edf2 75%);
-            background-size: 200% 100%;
-            animation: shimmer 1.4s infinite;
-            border-radius: 2px;
-        }
-        @keyframes shimmer { 0%{background-position:200% 0} 100%{background-position:-200% 0} }
-
-        /* ── RESPONSIVE ── */
-        @media(max-width: 768px) {
-            .nav-links { display: none; }
-            .nav-links.open { display: flex; flex-direction: column; position: absolute; top: 56px; left: 0; right: 0; background: var(--primary); padding: 16px; gap: 4px; }
-            .burger { display: block; }
-            .footer-grid { grid-template-columns: 1fr; }
-            .result-grid { grid-template-columns: 1fr; }
-            .stats-bar { flex-wrap: wrap; }
-        }
-    </style>
+    @media (max-width:768px) {
+      .hide-mobile { display: none; }
+      .mobile-menu { display: none; }
+      .mobile-menu.open { display: flex; }
+    }
+  </style>
 </head>
 <body>
 
-<!-- NAV -->
-<nav>
-    <a href="index.html" class="nav-logo">TUGASIN DIGITAL</a>
-    <div class="nav-links" id="nav-links">
-        <a href="#layanan">Layanan</a>
-        <a href="#tracker">Cek Order</a>
-        <a href="testimoni.html">Testimoni</a>
-        <a href="#faq">FAQ</a>
-        <a href="order.html" class="nav-btn">ORDER SEKARANG</a>
-    </div>
-    <button class="burger" onclick="document.getElementById('nav-links').classList.toggle('open')">&#9776;</button>
+<!-- ═══ NAV ═══ -->
+<nav class="sticky top-0 z-50" style="background:var(--navy); height:56px; display:flex; align-items:center; padding:0 24px; justify-content:space-between;">
+  <a href="index.html" class="pixel" style="font-size:.65rem; color:var(--accent); text-decoration:none;">TUGASIN DIGITAL</a>
+  <div class="hide-mobile" style="display:flex; gap:4px; align-items:center;">
+    <a href="#layanan"       class="nav-link">Layanan</a>
+    <a href="track.html"     class="nav-link">Cek Order</a>
+    <a href="#testimoni"     class="nav-link">Testimoni</a>
+    <a href="#faq"           class="nav-link">FAQ</a>
+    <a href="order.html" class="pixel" style="font-size:.5rem; background:var(--accent); color:var(--navy); padding:8px 16px; border:2px solid white; text-decoration:none; margin-left:8px;">ORDER</a>
+  </div>
+  <button id="burger" class="pixel" style="display:none; background:none; border:none; color:white; font-size:1.1rem; cursor:pointer;" onclick="document.getElementById('mobile-nav').classList.toggle('open')">&#9776;</button>
 </nav>
-
-<!-- HERO -->
-<div class="hero">
-    <div class="hero-content">
-        <div class="hero-badge">ONLINE · FAST RESPONSE · FULL INDONESIA</div>
-        <h1>TUGASIN DIGITAL<br><span>Rapi. Cepat. Sesuai Brief.</span></h1>
-        <p>Joki Tugas · Desain · Coding — Dari SMP sampai Kuliah</p>
-        <div class="hero-cta">
-            <a href="order.html" class="btn-primary">ORDER SEKARANG</a>
-            <a href="https://wa.me/6289540108751" target="_blank" class="btn-outline">TANYA DULU</a>
-        </div>
-    </div>
+<div id="mobile-nav" class="mobile-menu" style="flex-direction:column; background:var(--navy); padding:12px 24px 20px; gap:4px; border-bottom:3px solid var(--accent);">
+  <a href="#layanan"   class="nav-link">Layanan</a>
+  <a href="track.html" class="nav-link">Cek Order</a>
+  <a href="#testimoni" class="nav-link">Testimoni</a>
+  <a href="#faq"       class="nav-link">FAQ</a>
+  <a href="order.html" class="nav-link" style="color:var(--accent); font-weight:700;">ORDER SEKARANG</a>
 </div>
 
-<!-- STATS BAR -->
-<div class="stats-bar">
-    <div class="stat-item">
-        <span class="stat-num">15+</span>
-        <div class="stat-label">Jenis Layanan</div>
+<!-- ═══ HERO ═══ -->
+<div style="background:var(--navy); padding:80px 24px 64px; position:relative; overflow:hidden;" class="hero-grid">
+  <div class="inner" style="text-align:center; position:relative; z-index:1;">
+
+    <div class="pixel" style="display:inline-block; background:var(--accent); color:var(--navy); font-size:.45rem; padding:6px 14px; border:2px solid rgba(255,255,255,.3); margin-bottom:24px; letter-spacing:1px;">
+      ONLINE &nbsp;·&nbsp; FAST RESPONSE &nbsp;·&nbsp; SELURUH INDONESIA
     </div>
-    <div class="stat-item">
-        <span class="stat-num">100+</span>
-        <div class="stat-label">Order Selesai</div>
+
+    <h1 class="pixel" style="color:white; font-size:clamp(1rem,3.5vw,2rem); line-height:1.6; margin-bottom:8px;">
+      LEVEL UP YOUR GRADES
+    </h1>
+    <!-- typewriter sub -->
+    <div style="min-height:28px; display:flex; justify-content:center; margin-bottom:20px;">
+      <span id="typewriter-text" class="pixel" style="font-size:clamp(.55rem,1.5vw,.9rem); color:var(--accent); display:inline-block;"></span>
     </div>
-    <div class="stat-item">
-        <span class="stat-num">4.9</span>
-        <div class="stat-label">Rating Klien</div>
+
+    <p style="color:rgba(255,255,255,.6); font-size:.95rem; margin-bottom:36px;">
+      Joki Tugas &nbsp;·&nbsp; Desain &nbsp;·&nbsp; Coding — Dari SMP sampai Kuliah
+    </p>
+
+    <div style="display:flex; gap:12px; justify-content:center; flex-wrap:wrap; margin-bottom:52px;">
+      <a href="order.html" class="pixel" style="font-size:.6rem; background:var(--accent); color:var(--navy); padding:14px 28px; border:3px solid white; text-decoration:none; box-shadow:5px 5px 0 rgba(255,255,255,.25); transition:all .15s;" onmouseover="this.style.transform='translate(-2px,-2px)'" onmouseout="this.style.transform=''">ORDER SEKARANG</a>
+      <a href="track.html" class="pixel" style="font-size:.6rem; background:transparent; color:white; padding:14px 28px; border:3px solid rgba(255,255,255,.45); text-decoration:none; transition:all .15s;" onmouseover="this.style.borderColor='var(--accent)';this.style.color='var(--accent)'" onmouseout="this.style.borderColor='rgba(255,255,255,.45)';this.style.color='white'">CEK ORDER ID</a>
     </div>
-    <div class="stat-item">
-        <span class="stat-num">&lt;5m</span>
-        <div class="stat-label">Response Time</div>
+
+    <!-- stats -->
+    <div style="display:grid; grid-template-columns:repeat(4,1fr); max-width:600px; margin:0 auto; border:3px solid rgba(255,255,255,.15);">
+      <div style="padding:16px; border-right:1px solid rgba(255,255,255,.1); text-align:center;">
+        <div class="pixel" style="font-size:1rem; color:var(--accent);">15+</div>
+        <div style="font-size:.7rem; color:rgba(255,255,255,.5); margin-top:4px;">Layanan</div>
+      </div>
+      <div style="padding:16px; border-right:1px solid rgba(255,255,255,.1); text-align:center;">
+        <div class="pixel" style="font-size:1rem; color:var(--accent);">100+</div>
+        <div style="font-size:.7rem; color:rgba(255,255,255,.5); margin-top:4px;">Order</div>
+      </div>
+      <div style="padding:16px; border-right:1px solid rgba(255,255,255,.1); text-align:center;">
+        <div class="pixel" style="font-size:1rem; color:var(--accent);">4.9</div>
+        <div style="font-size:.7rem; color:rgba(255,255,255,.5); margin-top:4px;">Rating</div>
+      </div>
+      <div style="padding:16px; text-align:center;">
+        <div class="pixel" style="font-size:1rem; color:var(--accent);">&lt;5m</div>
+        <div style="font-size:.7rem; color:rgba(255,255,255,.5); margin-top:4px;">Response</div>
+      </div>
     </div>
+
+  </div>
 </div>
 
-<!-- LAYANAN / KATALOG -->
-<section id="layanan">
-    <div class="section-inner">
-        <div class="section-label">// KATALOG LAYANAN</div>
-        <div class="section-title">SEMUA YANG LO BUTUHIN</div>
-
-        <div class="filter-row" id="filter-row">
-            <button class="filter-tab active" data-filter="all">SEMUA</button>
-            <button class="filter-tab" data-filter="Tugas Akademik">AKADEMIK</button>
-            <button class="filter-tab" data-filter="Desain Visual">DESAIN</button>
-            <button class="filter-tab" data-filter="Pemrograman">CODING</button>
-            <button class="filter-tab" data-filter="Organisasi">ORGANISASI</button>
-            <button class="filter-tab" data-filter="Dokumen Bisnis">BISNIS</button>
-            <button class="filter-tab" data-filter="Bundling">BUNDLING</button>
-        </div>
-
-        <div class="cards-grid" id="services-container">
-            <div class="card"><div class="skeleton" style="height:180px"></div></div>
-            <div class="card"><div class="skeleton" style="height:180px"></div></div>
-            <div class="card"><div class="skeleton" style="height:180px"></div></div>
-        </div>
-        <div id="empty-state" style="display:none; text-align:center; padding:40px; color:var(--muted)">
-            <p style="font-family:'Press Start 2P',cursive; font-size:0.6rem">TIDAK ADA LAYANAN DI KATEGORI INI</p>
-        </div>
-    </div>
-</section>
-
-<!-- CEK ORDER TRACKER -->
-<section id="tracker">
-    <div class="section-inner">
-        <div class="tracker-box">
-            <div class="section-label" style="color:rgba(255,255,255,0.5); display:none">// TRACKER</div>
-            <div class="section-title">CEK STATUS ORDERMU</div>
-            <p>Masukkan ID Order dari pesan konfirmasi WhatsApp kamu.</p>
-            <div class="tracker-input-row">
-                <input type="text" id="tracker-input" placeholder="TD-20260101-XXXX" maxlength="25" onkeydown="if(event.key==='Enter')checkOrder()">
-                <button class="btn-check" onclick="checkOrder()">CEK</button>
-            </div>
-            <p style="font-size:0.72rem; color:var(--muted); margin-top:8px; margin-bottom:0">Format: TD-YYYYMMDD-XXXX</p>
-            <div id="tracker-result"></div>
-        </div>
-    </div>
-</section>
-
-<!-- CARA KERJA -->
-<section id="cara-kerja">
-    <div class="section-inner">
-        <div class="section-label">// PROSES ORDER</div>
-        <div class="section-title">SUPER SIMPLE, 4 LANGKAH</div>
-        <div class="steps-grid">
-            <div class="step-item">
-                <div class="step-num">01</div>
-                <h4>ORDER</h4>
-                <p>Isi form order atau chat WA langsung dengan detail tugas dan deadline kamu.</p>
-            </div>
-            <div class="step-item">
-                <div class="step-num">02</div>
-                <h4>DP 50%</h4>
-                <p>Transfer DP 50% ke rekening yang tertera di konfirmasi setelah harga disepakati.</p>
-            </div>
-            <div class="step-item">
-                <div class="step-num">03</div>
-                <h4>PROSES</h4>
-                <p>Tim kami kerjakan sesuai brief. Progress bisa kamu pantau via ID Order.</p>
-            </div>
-            <div class="step-item">
-                <div class="step-num">04</div>
-                <h4>TERIMA</h4>
-                <p>File dikirim via Google Drive. Bayar pelunasan, revisi 2x gratis dalam 24 jam.</p>
-            </div>
-        </div>
-    </div>
-</section>
-
-<!-- TESTIMONI PREVIEW -->
-<section id="testimoni-preview">
-    <div class="section-inner">
-        <div class="section-label">// KATA KLIEN</div>
-        <div class="section-title">REVIEW JUJUR DARI MEREKA</div>
-
-        <div class="testi-grid">
-            <div class="testi-card">
-                <div class="testi-stars">★★★★★</div>
-                <p class="testi-text">"Esai 10 halaman jadi dalam 6 jam, format rapi dan gak ada typo. Auto repeat order."</p>
-                <div class="testi-author">
-                    <div class="testi-avatar">R</div>
-                    <div>
-                        <div class="testi-name">Rizky A.</div>
-                        <div class="testi-meta">Mahasiswa Teknik · Esai</div>
-                    </div>
-                </div>
-            </div>
-            <div class="testi-card">
-                <div class="testi-stars">★★★★★</div>
-                <p class="testi-text">"PPT-nya keren banget, guruku sampai tanya buat di mana. Harganya juga murah banget, recommended 100%!"</p>
-                <div class="testi-author">
-                    <div class="testi-avatar">S</div>
-                    <div>
-                        <div class="testi-name">Sari M.</div>
-                        <div class="testi-meta">SMA · PPT Presentasi</div>
-                    </div>
-                </div>
-            </div>
-            <div class="testi-card">
-                <div class="testi-stars">★★★★★</div>
-                <p class="testi-text">"Coding Python-ku jalan sempurna, ada komentar di tiap fungsi jadi aku paham alurnya. Pas ditanya dosen bisa jelasin."</p>
-                <div class="testi-author">
-                    <div class="testi-avatar">D</div>
-                    <div>
-                        <div class="testi-name">Dimas P.</div>
-                        <div class="testi-meta">Mahasiswa IT · Coding</div>
-                    </div>
-                </div>
-            </div>
-        </div>
-
-        <div class="see-all-row">
-            <a href="testimoni.html" class="btn-see-all">LIHAT SEMUA TESTIMONI</a>
-        </div>
-    </div>
-</section>
-
-<!-- FAQ -->
-<section id="faq">
-    <div class="section-inner">
-        <div class="section-label">// PERTANYAAN UMUM</div>
-        <div class="section-title">FAQ</div>
-        <div class="faq-list" id="faq-list"></div>
-    </div>
-</section>
-
-<!-- CTA BANNER -->
-<div class="cta-banner">
-    <h2>DEADLINE MEPET? LANGSUNG TUGASIN AJA.</h2>
-    <p>Brief udah ada? Tim kami siap handle dari sekarang.</p>
-    <div class="cta-btns">
-        <a href="order.html" class="btn-cta-main">FORM ORDER</a>
-        <a href="https://wa.me/6289540108751?text=Halo!%20Saya%20mau%20order%20di%20Tugasin%20Digital." target="_blank" class="btn-cta-wa">CHAT WHATSAPP</a>
-    </div>
+<!-- marquee ticker -->
+<div style="background:var(--accent); border-top:3px solid var(--navy); border-bottom:3px solid var(--navy); padding:10px 0; overflow:hidden;">
+  <div class="marquee-track">
+    <span class="pixel" style="font-size:.42rem; padding:0 28px; white-space:nowrap; color:var(--navy);">ESAI & MAKALAH</span>
+    <span class="pixel" style="font-size:.42rem; padding:0 28px; white-space:nowrap; color:var(--navy);">CODING PROJECT</span>
+    <span class="pixel" style="font-size:.42rem; padding:0 28px; white-space:nowrap; color:var(--navy);">DESAIN CANVA</span>
+    <span class="pixel" style="font-size:.42rem; padding:0 28px; white-space:nowrap; color:var(--navy);">LAPORAN PKL</span>
+    <span class="pixel" style="font-size:.42rem; padding:0 28px; white-space:nowrap; color:var(--navy);">CV ATS-FRIENDLY</span>
+    <span class="pixel" style="font-size:.42rem; padding:0 28px; white-space:nowrap; color:var(--navy);">SKRIPSI PER BAB</span>
+    <span class="pixel" style="font-size:.42rem; padding:0 28px; white-space:nowrap; color:var(--navy);">COMPANY PROFILE</span>
+    <span class="pixel" style="font-size:.42rem; padding:0 28px; white-space:nowrap; color:var(--navy);">PROPOSAL SPONSORSHIP</span>
+    <span class="pixel" style="font-size:.42rem; padding:0 28px; white-space:nowrap; color:var(--navy);">ESAI & MAKALAH</span>
+    <span class="pixel" style="font-size:.42rem; padding:0 28px; white-space:nowrap; color:var(--navy);">CODING PROJECT</span>
+    <span class="pixel" style="font-size:.42rem; padding:0 28px; white-space:nowrap; color:var(--navy);">DESAIN CANVA</span>
+    <span class="pixel" style="font-size:.42rem; padding:0 28px; white-space:nowrap; color:var(--navy);">LAPORAN PKL</span>
+    <span class="pixel" style="font-size:.42rem; padding:0 28px; white-space:nowrap; color:var(--navy);">CV ATS-FRIENDLY</span>
+    <span class="pixel" style="font-size:.42rem; padding:0 28px; white-space:nowrap; color:var(--navy);">SKRIPSI PER BAB</span>
+    <span class="pixel" style="font-size:.42rem; padding:0 28px; white-space:nowrap; color:var(--navy);">COMPANY PROFILE</span>
+    <span class="pixel" style="font-size:.42rem; padding:0 28px; white-space:nowrap; color:var(--navy);">PROPOSAL SPONSORSHIP</span>
+  </div>
 </div>
 
-<!-- FOOTER -->
-<footer>
-    <div class="footer-inner">
-        <div class="footer-grid">
-            <div>
-                <div class="footer-brand">TUGASIN DIGITAL</div>
-                <p class="footer-desc">Digital Service Agency — Joki Tugas, Desain & Coding. Dari SMP sampai Kuliah, rapi, cepat, sesuai brief.</p>
-            </div>
-            <div class="footer-col">
-                <h4>HALAMAN</h4>
-                <a href="#layanan">Katalog Layanan</a>
-                <a href="order.html">Form Order</a>
-                <a href="#tracker">Cek Status</a>
-                <a href="testimoni.html">Testimoni</a>
-                <a href="admin.html">Admin</a>
-            </div>
-            <div class="footer-col">
-                <h4>KONTAK</h4>
-                <a href="https://wa.me/6289540108751" target="_blank">WA: 0895-401087518</a>
-                <a href="https://instagram.com/tugasin.digital" target="_blank">IG: @tugasin.digital</a>
-            </div>
-        </div>
-        <div class="footer-bottom">
-            <p>© 2026 Tugasin Digital · Owner: Ananda Maulid</p>
-            <p style="font-family:'Press Start 2P',cursive; font-size:0.45rem; color:rgba(255,255,255,0.35)">#TUGASINAJA</p>
-        </div>
+<!-- ═══ KATALOG ═══ -->
+<section id="layanan" class="section">
+  <div class="inner">
+    <div class="sec-label">// KATALOG LAYANAN</div>
+    <div class="sec-title">SEMUA YANG LO BUTUHIN</div>
+
+    <div style="display:flex; flex-wrap:wrap; gap:8px; margin-bottom:28px;" id="filter-row">
+      <button class="ftab active" data-f="all">SEMUA</button>
+      <button class="ftab" data-f="Tugas Akademik">AKADEMIK</button>
+      <button class="ftab" data-f="Desain Visual">DESAIN</button>
+      <button class="ftab" data-f="Pemrograman">CODING</button>
+      <button class="ftab" data-f="Organisasi">ORGANISASI</button>
+      <button class="ftab" data-f="Dokumen Bisnis">BISNIS</button>
+      <button class="ftab" data-f="Bundling">BUNDLING</button>
     </div>
+
+    <div id="cards-grid" style="display:grid; grid-template-columns:repeat(auto-fill,minmax(280px,1fr)); gap:20px;"></div>
+  </div>
+</section>
+
+<!-- ═══ HOW IT WORKS ═══ -->
+<section style="background:white; border-top:4px solid var(--navy); border-bottom:4px solid var(--navy); padding:64px 24px;">
+  <div class="inner">
+    <div class="sec-label">// PROSES ORDER</div>
+    <div class="sec-title">4 LANGKAH SIMPEL</div>
+    <div style="display:grid; grid-template-columns:repeat(auto-fit,minmax(180px,1fr)); gap:24px; align-items:start;">
+      <div style="text-align:center;">
+        <div class="pixel" style="width:52px;height:52px;background:var(--navy);color:var(--accent);font-size:1rem;display:flex;align-items:center;justify-content:center;margin:0 auto 16px;box-shadow:4px 4px 0 var(--accent);">01</div>
+        <div class="pixel" style="font-size:.5rem;margin-bottom:8px;">ORDER</div>
+        <p style="font-size:.82rem;color:var(--muted);line-height:1.6;">Isi form order atau chat WA dengan detail tugas dan deadline.</p>
+      </div>
+      <div style="text-align:center;">
+        <div class="pixel" style="width:52px;height:52px;background:var(--navy);color:var(--accent);font-size:1rem;display:flex;align-items:center;justify-content:center;margin:0 auto 16px;box-shadow:4px 4px 0 var(--accent);">02</div>
+        <div class="pixel" style="font-size:.5rem;margin-bottom:8px;">DP 50%</div>
+        <p style="font-size:.82rem;color:var(--muted);line-height:1.6;">Transfer DP 50% ke rekening yang tertera. Pengerjaan langsung mulai.</p>
+      </div>
+      <div style="text-align:center;">
+        <div class="pixel" style="width:52px;height:52px;background:var(--navy);color:var(--accent);font-size:1rem;display:flex;align-items:center;justify-content:center;margin:0 auto 16px;box-shadow:4px 4px 0 var(--accent);">03</div>
+        <div class="pixel" style="font-size:.5rem;margin-bottom:8px;">PROSES</div>
+        <p style="font-size:.82rem;color:var(--muted);line-height:1.6;">Tim kerjakan sesuai brief. Pantau progress via ID Order kapan saja.</p>
+      </div>
+      <div style="text-align:center;">
+        <div class="pixel" style="width:52px;height:52px;background:var(--navy);color:var(--accent);font-size:1rem;display:flex;align-items:center;justify-content:center;margin:0 auto 16px;box-shadow:4px 4px 0 var(--accent);">04</div>
+        <div class="pixel" style="font-size:.5rem;margin-bottom:8px;">TERIMA</div>
+        <p style="font-size:.82rem;color:var(--muted);line-height:1.6;">File via Google Drive setelah pelunasan. Revisi 2x gratis dalam 24 jam.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ═══ TESTIMONI — RPG DIALOG STYLE ═══ -->
+<section id="testimoni" class="section" style="background:var(--bg);">
+  <div class="inner">
+    <div class="sec-label">// REVIEW KLIEN</div>
+    <div class="sec-title">KATA MEREKA</div>
+
+    <!-- slider wrapper -->
+    <div style="position:relative;">
+      <div id="testi-track" style="overflow:hidden;">
+        <div id="testi-slides" style="display:flex; gap:20px; transition:transform .4s ease; will-change:transform;"></div>
+      </div>
+      <!-- arrows -->
+      <button id="testi-prev" onclick="slideTestimoni(-1)" class="pixel" style="position:absolute;top:50%;left:-20px;transform:translateY(-50%);width:40px;height:40px;background:var(--navy);color:var(--accent);border:3px solid var(--navy);font-size:.7rem;cursor:pointer;z-index:10;">&#8592;</button>
+      <button id="testi-next" onclick="slideTestimoni(1)"  class="pixel" style="position:absolute;top:50%;right:-20px;transform:translateY(-50%);width:40px;height:40px;background:var(--navy);color:var(--accent);border:3px solid var(--navy);font-size:.7rem;cursor:pointer;z-index:10;">&#8594;</button>
+    </div>
+
+    <!-- dots -->
+    <div id="testi-dots" style="display:flex;justify-content:center;gap:8px;margin-top:24px;"></div>
+
+    <!-- rating summary -->
+    <div style="text-align:center;margin-top:36px;padding:24px;background:white;border:3px solid var(--navy);box-shadow:5px 5px 0 var(--navy);max-width:360px;margin:36px auto 0;">
+      <div class="pixel" style="font-size:2rem;color:var(--navy);">4.9/5</div>
+      <div style="font-size:1.3rem;color:var(--accent);margin:6px 0;">&#9733;&#9733;&#9733;&#9733;&#9733;</div>
+      <div style="font-size:.8rem;color:var(--muted);">Dari 50+ klien aktif</div>
+    </div>
+  </div>
+</section>
+
+<!-- ═══ FAQ ═══ -->
+<section id="faq" style="background:white;border-top:4px solid var(--navy);padding:64px 24px;">
+  <div class="inner" style="max-width:760px;">
+    <div class="sec-label">// PERTANYAAN UMUM</div>
+    <div class="sec-title">FAQ</div>
+    <div id="faq-list"></div>
+  </div>
+</section>
+
+<!-- ═══ CTA ═══ -->
+<div style="background:var(--accent);border-top:4px solid var(--navy);border-bottom:4px solid var(--navy);padding:60px 24px;text-align:center;">
+  <h2 class="pixel" style="font-size:clamp(.8rem,2.5vw,1.2rem);color:var(--navy);margin-bottom:10px;line-height:1.7;">DEADLINE MEPET? LANGSUNG TUGASIN.</h2>
+  <p style="color:rgba(42,58,90,.7);margin-bottom:28px;">Brief udah ada? Tim kami siap handle dari sekarang.</p>
+  <div style="display:flex;gap:12px;justify-content:center;flex-wrap:wrap;">
+    <a href="order.html" class="pixel" style="font-size:.6rem;background:var(--navy);color:white;padding:14px 28px;border:3px solid var(--navy);text-decoration:none;box-shadow:5px 5px 0 rgba(42,58,90,.3);transition:all .15s;" onmouseover="this.style.transform='translate(-2px,-2px)'" onmouseout="this.style.transform=''">FORM ORDER</a>
+    <a href="https://wa.me/6289540108751" target="_blank" class="pixel" style="font-size:.6rem;background:#25d366;color:white;padding:14px 28px;border:3px solid var(--navy);text-decoration:none;box-shadow:5px 5px 0 rgba(42,58,90,.3);transition:all .15s;" onmouseover="this.style.transform='translate(-2px,-2px)'" onmouseout="this.style.transform=''">CHAT WHATSAPP</a>
+  </div>
+</div>
+
+<!-- ═══ FOOTER ═══ -->
+<footer style="background:var(--navy);padding:48px 24px 24px;">
+  <div class="inner">
+    <div style="display:grid;grid-template-columns:2fr 1fr 1fr;gap:40px;margin-bottom:36px;" id="footer-grid">
+      <div>
+        <div class="pixel" style="font-size:.65rem;color:var(--accent);margin-bottom:12px;">TUGASIN DIGITAL</div>
+        <p style="font-size:.82rem;color:rgba(255,255,255,.55);line-height:1.7;">Digital Service Agency — Joki Tugas, Desain & Coding. Dari SMP sampai Kuliah.</p>
+      </div>
+      <div>
+        <div class="pixel" style="font-size:.42rem;color:var(--accent);margin-bottom:12px;letter-spacing:1px;">HALAMAN</div>
+        <a href="#layanan"   style="display:block;color:rgba(255,255,255,.55);font-size:.82rem;text-decoration:none;margin-bottom:6px;transition:color .15s;" onmouseover="this.style.color='var(--accent)'" onmouseout="this.style.color='rgba(255,255,255,.55)'">Katalog</a>
+        <a href="order.html" style="display:block;color:rgba(255,255,255,.55);font-size:.82rem;text-decoration:none;margin-bottom:6px;transition:color .15s;" onmouseover="this.style.color='var(--accent)'" onmouseout="this.style.color='rgba(255,255,255,.55)'">Form Order</a>
+        <a href="track.html" style="display:block;color:rgba(255,255,255,.55);font-size:.82rem;text-decoration:none;margin-bottom:6px;transition:color .15s;" onmouseover="this.style.color='var(--accent)'" onmouseout="this.style.color='rgba(255,255,255,.55)'">Cek Order</a>
+        <a href="login.html" style="display:block;color:rgba(255,255,255,.55);font-size:.82rem;text-decoration:none;transition:color .15s;" onmouseover="this.style.color='var(--accent)'" onmouseout="this.style.color='rgba(255,255,255,.55)'">Admin</a>
+      </div>
+      <div>
+        <div class="pixel" style="font-size:.42rem;color:var(--accent);margin-bottom:12px;letter-spacing:1px;">KONTAK</div>
+        <a href="https://wa.me/6289540108751" target="_blank" style="display:block;color:rgba(255,255,255,.55);font-size:.82rem;text-decoration:none;margin-bottom:6px;transition:color .15s;" onmouseover="this.style.color='var(--accent)'" onmouseout="this.style.color='rgba(255,255,255,.55)'">WA: 0895-401087518</a>
+        <a href="https://instagram.com/tugasin.digital" target="_blank" style="display:block;color:rgba(255,255,255,.55);font-size:.82rem;text-decoration:none;transition:color .15s;" onmouseover="this.style.color='var(--accent)'" onmouseout="this.style.color='rgba(255,255,255,.55)'">IG: @tugasin.digital</a>
+      </div>
+    </div>
+    <div style="border-top:1px solid rgba(255,255,255,.1);padding-top:20px;display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:8px;">
+      <p style="font-size:.75rem;color:rgba(255,255,255,.35);">© 2026 Tugasin Digital · Ananda Maulid</p>
+      <p class="pixel" style="font-size:.38rem;color:rgba(255,255,255,.25);">#TUGASINAJA</p>
+    </div>
+  </div>
 </footer>
 
+<style>
+  @media(max-width:768px){
+    #footer-grid { grid-template-columns:1fr !important; gap:24px !important; }
+    #burger { display:block !important; }
+  }
+</style>
+
 <script>
-    // ─── SUPABASE CONFIG ───
-    const _URL = "https://zopnowgdpheylnvzjrlb.supabase.co";
-    const _KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InpvcG5vd2dkcGhleWxudnpqcmxiIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzM4MTE2MzAsImV4cCI6MjA4OTM4NzYzMH0.9VomavT2pF6vvjzVhC5HQVCMTidTesukGAqAnPC8UyI";
-    const db = supabase.createClient(_URL, _KEY);
+  // ─── SUPABASE ───
+  const _URL = "https://zopnowgdpheylnvzjrlb.supabase.co";
+  const _KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InpvcG5vd2dkcGhleWxudnpqcmxiIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzM4MTE2MzAsImV4cCI6MjA4OTM4NzYzMH0.9VomavT2pF6vvjzVhC5HQVCMTidTesukGAqAnPC8UyI";
+  const db = supabase.createClient(_URL, _KEY);
 
-    // ─── SERVICES ───
-    let allServices = [];
-
-    async function loadServices() {
-        const { data, error } = await db.from('services').select('*').order('id');
-        if (error || !data) {
-            allServices = getDemoServices();
-        } else {
-            allServices = data.length ? data : getDemoServices();
-        }
-        renderServices('all');
+  // ─── TYPEWRITER ───
+  const phrases = ["RAPI. CEPAT. SESUAI BRIEF.", "DARI SMP SAMPAI KULIAH.", "HARGA MULAI RP 20K.", "FAST RESPONSE < 5 MENIT."];
+  let pi = 0, ci = 0, deleting = false;
+  function typeLoop() {
+    const el = document.getElementById('typewriter-text');
+    const full = phrases[pi];
+    if (!deleting) {
+      el.textContent = full.slice(0, ++ci);
+      if (ci === full.length) { deleting = true; setTimeout(typeLoop, 1800); return; }
+    } else {
+      el.textContent = full.slice(0, --ci);
+      if (ci === 0) { deleting = false; pi = (pi + 1) % phrases.length; setTimeout(typeLoop, 400); return; }
     }
+    setTimeout(typeLoop, deleting ? 40 : 70);
+  }
+  typeLoop();
 
-    function renderServices(filter) {
-        const container = document.getElementById('services-container');
-        const emptyState = document.getElementById('empty-state');
-        const list = filter === 'all' ? allServices : allServices.filter(s => s.category === filter);
+  // ─── SERVICES ───
+  let allSvcs = [];
+  async function loadServices() {
+    const grid = document.getElementById('cards-grid');
+    grid.innerHTML = [1,2,3].map(() => `<div class="skeleton" style="height:200px;border:3px solid #d0d8e8;"></div>`).join('');
+    try {
+      const { data } = await db.from('services').select('*').order('id');
+      allSvcs = (data && data.length) ? data : demo();
+    } catch { allSvcs = demo(); }
+    renderSvcs('all');
+  }
 
-        if (!list.length) {
-            container.innerHTML = '';
-            emptyState.style.display = 'block';
-            return;
-        }
-        emptyState.style.display = 'none';
+  function renderSvcs(f) {
+    const list = f === 'all' ? allSvcs : allSvcs.filter(s => s.category === f);
+    document.getElementById('cards-grid').innerHTML = list.length
+      ? list.map(s => `
+        <div class="card-hover" style="background:white;border:4px solid var(--navy);padding:22px;box-shadow:6px 6px 0 var(--navy);display:flex;flex-direction:column;">
+          <div style="font-size:.68rem;font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:1px;margin-bottom:6px;">${s.category}</div>
+          <h3 style="font-size:.95rem;font-weight:700;margin-bottom:8px;">${s.service_name}</h3>
+          <p style="font-size:.8rem;color:var(--muted);flex:1;margin-bottom:14px;line-height:1.6;">${s.description || 'Layanan berkualitas sesuai kebutuhanmu.'}</p>
+          <div class="pixel" style="font-size:.65rem;color:#e67e22;margin-bottom:14px;">Rp ${Math.round(s.price_min/1000)}K – ${Math.round(s.price_max/1000)}K</div>
+          <a href="order.html?service=${encodeURIComponent(s.service_name)}" style="display:block;text-align:center;background:var(--navy);color:white;padding:10px;font-weight:700;font-size:.82rem;text-decoration:none;border:2px solid var(--navy);transition:background .15s;" onmouseover="this.style.background='var(--accent)';this.style.color='var(--navy)'" onmouseout="this.style.background='var(--navy)';this.style.color='white'">ORDER SEKARANG</a>
+        </div>`).join('')
+      : `<div style="grid-column:1/-1;text-align:center;padding:40px;color:var(--muted);"><span class="pixel" style="font-size:.6rem;">TIDAK ADA LAYANAN DI KATEGORI INI</span></div>`;
+  }
 
-        container.innerHTML = list.map(item => {
-            const min = Math.round(item.price_min / 1000);
-            const max = Math.round(item.price_max / 1000);
-            return `
-                <div class="card">
-                    <div class="card-category">${item.category}</div>
-                    <h3>${item.service_name}</h3>
-                    <p>${item.description || 'Layanan berkualitas sesuai kebutuhanmu.'}</p>
-                    <div class="card-price">Rp ${min}K – ${max}K</div>
-                    <a href="order.html?service=${encodeURIComponent(item.service_name)}" class="btn-order">ORDER SEKARANG</a>
-                </div>
-            `;
-        }).join('');
-    }
+  document.getElementById('filter-row').addEventListener('click', e => {
+    const btn = e.target.closest('.ftab');
+    if (!btn) return;
+    document.querySelectorAll('.ftab').forEach(b => b.classList.remove('active'));
+    btn.classList.add('active');
+    renderSvcs(btn.dataset.f);
+  });
 
-    // Filter tabs
-    document.querySelectorAll('.filter-tab').forEach(btn => {
-        btn.addEventListener('click', () => {
-            document.querySelectorAll('.filter-tab').forEach(b => b.classList.remove('active'));
-            btn.classList.add('active');
-            renderServices(btn.dataset.filter);
-        });
+  // ─── TESTIMONIALS — RPG DIALOG ───
+  const testiData = [
+    { name:'Rizky A.',  meta:'Mahasiswa Teknik · Esai',      rating:5, text:'Esai 10 halaman selesai dalam 6 jam, format rapi dan tidak ada satu pun typo. Bahasa mengalir dan sesuai format kampus. Sudah repeat order 3 kali.' },
+    { name:'Sari M.',   meta:'Siswi SMA · PPT Presentasi',   rating:5, text:'PPT-nya sangat bagus, guru saya sampai tanya buat di mana. Template konsisten dan ada grafik interaktifnya. Harga segini tidak sebanding sama hasilnya.' },
+    { name:'Dimas P.',  meta:'Mahasiswa IT · Coding Python',  rating:5, text:'Coding Python saya jalan sempurna, setiap fungsi ada komentarnya jadi saya benar-benar paham alurnya. Waktu ditanya dosen bisa menjelaskan dengan lancar.' },
+    { name:'Budi S.',   meta:'S1 Manajemen · Laporan PKL',   rating:5, text:'Laporan PKL 80 halaman selesai 3 hari sebelum deadline. Struktur bab sesuai panduan kampus, daftar pustaka lengkap. Nilai PKL saya A.' },
+    { name:'Nadia K.',  meta:'Pemilik UMKM · Paket Branding',rating:5, text:'Logo, poster, dan IG kit semuanya konsisten dan sangat profesional. Teman-teman banyak yang tanya desainernya siapa, langsung aku rekomendasikan.' },
+    { name:'Kevin S.',  meta:'Fresh Graduate · CV Portfolio', rating:5, text:'CV-nya ATS-friendly, layout bersih, dan ada versi Bahasa Inggrisnya. Sudah dipanggil interview 4 perusahaan dalam seminggu setelah pakai CV ini.' },
+  ];
+  let tsIdx = 0, tsPerView = 3;
+
+  function buildTesti() {
+    tsPerView = window.innerWidth < 640 ? 1 : window.innerWidth < 1024 ? 2 : 3;
+    const stars = n => '★'.repeat(n) + '☆'.repeat(5 - n);
+    const slides = document.getElementById('testi-slides');
+    slides.innerHTML = testiData.map((t, i) => `
+      <div style="flex:0 0 calc((100% - ${(tsPerView-1)*20}px)/${tsPerView});min-width:0;">
+        <div class="rpg-dialog" style="padding:22px;height:100%;display:flex;flex-direction:column;">
+          <div class="rpg-corner tl"></div><div class="rpg-corner tr"></div>
+          <div class="rpg-corner bl"></div><div class="rpg-corner br"></div>
+          <!-- RPG header bar -->
+          <div style="background:var(--navy);margin:-22px -22px 16px;padding:8px 14px;display:flex;align-items:center;justify-content:space-between;">
+            <div class="pixel" style="font-size:.45rem;color:var(--accent);">NPC DIALOG</div>
+            <div style="color:var(--accent);font-size:.85rem;">${stars(t.rating)}</div>
+          </div>
+          <p style="font-size:.85rem;color:var(--navy);line-height:1.7;flex:1;font-style:italic;">"${t.text}"</p>
+          <div style="display:flex;align-items:center;gap:10px;margin-top:16px;padding-top:14px;border-top:2px solid var(--bg);">
+            <div style="width:36px;height:36px;background:var(--navy);color:var(--accent);display:flex;align-items:center;justify-content:center;" class="pixel" style="font-size:.65rem;">${t.name.charAt(0)}</div>
+            <div>
+              <div style="font-weight:700;font-size:.85rem;">${t.name}</div>
+              <div style="font-size:.72rem;color:var(--muted);">${t.meta}</div>
+            </div>
+          </div>
+        </div>
+      </div>`).join('');
+
+    // dots
+    const total = Math.ceil(testiData.length / tsPerView);
+    document.getElementById('testi-dots').innerHTML = Array.from({length:total}, (_,i) =>
+      `<button onclick="goTesti(${i})" style="width:${i===0?'24px':'10px'};height:10px;background:${i===0?'var(--navy)':'#c8d4e4'};border:2px solid var(--navy);cursor:pointer;transition:all .2s;" id="dot-${i}"></button>`
+    ).join('');
+  }
+
+  function updateTesti() {
+    const trackWidth = document.getElementById('testi-track').offsetWidth;
+    const slideW = (trackWidth - (tsPerView - 1) * 20) / tsPerView;
+    document.getElementById('testi-slides').style.transform = `translateX(-${tsIdx * (slideW + 20)}px)`;
+    const total = Math.ceil(testiData.length / tsPerView);
+    document.querySelectorAll('[id^="dot-"]').forEach((d, i) => {
+      d.style.width = i === tsIdx ? '24px' : '10px';
+      d.style.background = i === tsIdx ? 'var(--navy)' : '#c8d4e4';
     });
+  }
 
-    // ─── ORDER TRACKER ───
-    async function checkOrder() {
-        const val = document.getElementById('tracker-input').value.trim().toUpperCase();
-        const resultEl = document.getElementById('tracker-result');
-        if (!val) return;
+  function slideTestimoni(dir) {
+    const max = Math.ceil(testiData.length / tsPerView) - 1;
+    tsIdx = Math.max(0, Math.min(max, tsIdx + dir));
+    updateTesti();
+  }
 
-        resultEl.innerHTML = '<p style="color:var(--muted); font-size:0.85rem; margin-top:16px">Mencari order...</p>';
+  function goTesti(i) { tsIdx = i; updateTesti(); }
+  window.addEventListener('resize', () => { buildTesti(); tsIdx = 0; });
 
-        const { data, error } = await db.from('orders').select('*').eq('order_id', val).single();
+  // ─── FAQ ───
+  const faqs = [
+    { q:'Berapa lama pengerjaan?', a:'Tergantung jenis dan kesulitan. Makalah atau esai biasanya 3–12 jam, PPT 6–24 jam, coding tergantung scope. Deadline bisa didiskusikan saat order.' },
+    { q:'Ada garansi revisi?', a:'Ada. Revisi gratis maksimal 2x untuk desain dan 1x untuk penulisan, dalam 1x24 jam setelah file dikirim. Revisi lanjutan dikenakan biaya tambahan yang disepakati.' },
+    { q:'Bagaimana sistem pembayaran?', a:'DP 50% sebelum pengerjaan, pelunasan 50% setelah kamu setuju dengan hasilnya. Tersedia via BCA, GoPay, Dana, dan QRIS. Tanpa DP, order tidak diproses.' },
+    { q:'Apa itu ID Order?', a:'ID Order format TD-YYYYMMDD-XXXX dikirim ke WhatsApp kamu saat konfirmasi. Gunakan ID ini di halaman track.html untuk memantau status order kapan saja.' },
+    { q:'Apakah data tugas saya aman?', a:'Data dan brief klien dijaga sepenuhnya dan tidak dibagikan ke pihak lain. Ini komitmen kami dalam menjaga kepercayaan klien jangka panjang.' },
+  ];
 
-        if (error || !data) {
-            resultEl.innerHTML = `
-                <div class="result-card" style="margin-top:16px; border-color:#ff5252">
-                    <p style="font-family:'Press Start 2P',cursive; font-size:0.6rem; color:#ff5252; margin-bottom:8px">ID TIDAK DITEMUKAN</p>
-                    <p style="font-size:0.82rem; color:var(--muted)">Cek kembali ID yang kamu masukkan, atau <a href="https://wa.me/6289540108751" style="color:var(--primary); font-weight:700">hubungi admin</a>.</p>
-                </div>
-            `;
-            return;
-        }
+  document.getElementById('faq-list').innerHTML = faqs.map((f,i) => `
+    <div class="faq-item" id="faq-${i}">
+      <button class="faq-q" onclick="toggleFaq(${i})">
+        <span>${f.q}</span>
+        <span class="faq-icon" id="fi-${i}">+</span>
+      </button>
+      <div class="faq-a">${f.a}</div>
+    </div>`).join('');
 
-        const sPill = { 'Pending':'pill-pending','Baru':'pill-pending','In Progress':'pill-progress','Review':'pill-review','Selesai':'pill-done' };
-        const pPill = { 'Belum Bayar':'pill-unpaid','DP 50%':'pill-dp','Lunas':'pill-lunas' };
+  function toggleFaq(i) {
+    const el = document.getElementById(`faq-${i}`);
+    const open = el.classList.contains('open');
+    document.querySelectorAll('.faq-item').forEach(e => e.classList.remove('open'));
+    document.querySelectorAll('[id^="fi-"]').forEach(e => e.textContent = '+');
+    if (!open) { el.classList.add('open'); document.getElementById(`fi-${i}`).textContent = '-'; }
+  }
 
-        resultEl.innerHTML = `
-            <div class="result-card" style="margin-top:16px">
-                <div class="result-grid">
-                    <div class="result-item"><span>ID Order</span><span style="font-family:'Press Start 2P',cursive; font-size:0.65rem; color:var(--primary)">${data.order_id}</span></div>
-                    <div class="result-item"><span>Nama</span><span>${data.customer_name}</span></div>
-                    <div class="result-item"><span>Layanan</span><span>${data.service_name}</span></div>
-                    <div class="result-item"><span>Deadline</span><span>${data.deadline || '-'}</span></div>
-                    ${data.price ? `<div class="result-item"><span>Harga</span><span style="color:#e67e22">Rp ${Number(data.price).toLocaleString('id-ID')}</span></div>` : ''}
-                </div>
-                <div style="display:flex; gap:8px; flex-wrap:wrap">
-                    <span class="status-pill ${sPill[data.status] || 'pill-pending'}">${data.status || 'Pending'}</span>
-                    <span class="status-pill ${pPill[data.payment_status] || 'pill-unpaid'}">${data.payment_status || 'Belum Bayar'}</span>
-                </div>
-                <div style="margin-top:16px">
-                    <a href="https://wa.me/6289540108751?text=Halo!%20Mau%20tanya%20progress%20order%20${data.order_id}" target="_blank" style="font-size:0.82rem; font-weight:700; color:var(--primary)">Tanya progress via WA</a>
-                </div>
-            </div>
-        `;
-    }
-
-    // ─── FAQ ───
-    const faqs = [
-        { q: 'Berapa lama pengerjaan?', a: 'Tergantung jenis layanan dan tingkat kesulitan. Makalah atau esai biasanya 3–12 jam, PPT 6–24 jam, coding tergantung scope. Deadline bisa didiskusikan saat order.' },
-        { q: 'Apakah ada garansi revisi?', a: 'Ada. Revisi gratis maksimal 2x untuk layanan desain dan 1x untuk penulisan, dalam 1x24 jam setelah file dikirim. Revisi di luar itu dikenakan biaya tambahan yang disepakati.' },
-        { q: 'Bagaimana sistem pembayaran?', a: 'DP 50% sebelum pengerjaan dimulai, pelunasan 50% setelah kamu approve hasil. Tersedia via BCA, GoPay, Dana, dan QRIS. Tanpa DP, order tidak akan diproses.' },
-        { q: 'Apa itu ID Order?', a: 'ID Order adalah kode unik format TD-YYYYMMDD-XXXX yang dikirimkan ke WhatsApp kamu saat konfirmasi order. Gunakan ID ini untuk cek status di halaman ini.' },
-        { q: 'Apakah data tugas saya aman?', a: 'Kerahasiaan data dan brief klien dijaga penuh dan tidak dibagikan ke pihak manapun. Ini komitmen kami dalam menjaga kepercayaan klien.' },
-        { q: 'Bisa kirim file referensi saat order?', a: 'Bisa. Di form order ada fitur upload file, kamu bisa lampirkan contoh, template, atau dokumen referensi apa pun yang membantu tim memahami brief kamu lebih akurat.' },
+  // ─── DEMO DATA ───
+  function demo() {
+    return [
+      {id:1,service_name:'Esai & Makalah',category:'Tugas Akademik',price_min:35000,price_max:300000,description:'Dari SMP s/d Kuliah, riset & sitasi rapi, bahasa jelas dan mengalir.'},
+      {id:2,service_name:'PPT & Desain Canva + HyperLink',category:'Desain Visual',price_min:35000,price_max:350000,description:'Slide clean dan fokus visual, template konsisten, bisa tambah grafik.'},
+      {id:3,service_name:'Coding (HTML/CSS/JS/PHP/Python/C++)',category:'Pemrograman',price_min:50000,price_max:400000,description:'Struktur rapi dan runnable, komentar seperlunya, disertai cara menjalankan.'},
+      {id:4,service_name:'Laporan PKL / Praktikum',category:'Tugas Akademik',price_min:60000,price_max:450000,description:'Struktur bab sesuai aturan kampus, tabel dan grafik rapi, lampiran lengkap.'},
+      {id:5,service_name:'CV Portofolio & Resume',category:'Desain Visual',price_min:80000,price_max:250000,description:'ATS-friendly dan ringkas, layout profesional, versi Inggris dan Indonesia.'},
+      {id:6,service_name:'Kebutuhan Organisasi',category:'Organisasi',price_min:50000,price_max:400000,description:'Proposal, desain pamflet, LPJ, notulensi, dan surat resmi.'},
+      {id:7,service_name:'Joki Skripsi (per bab)',category:'Tugas Akademik',price_min:100000,price_max:900000,description:'Per bab, harga negosiasi, disertai referensi valid dan daftar pustaka.'},
+      {id:8,service_name:'Desain Poster Bisnis',category:'Desain Visual',price_min:25000,price_max:220000,description:'Ukuran IG, Print, atau Baliho. Cocok untuk promosi UMKM dan event.'},
+      {id:9,service_name:'Company Profile',category:'Dokumen Bisnis',price_min:100000,price_max:900000,description:'Format PDF dan Word, layout profesional, dilengkapi elemen grafis.'},
+      {id:10,service_name:'Paket Branding UMKM',category:'Bundling',price_min:200000,price_max:1500000,description:'Logo, poster, PPT company profile, dan IG kit dalam satu paket hemat.'},
     ];
+  }
 
-    function renderFAQ() {
-        document.getElementById('faq-list').innerHTML = faqs.map((f, i) => `
-            <div class="faq-item" id="faq-${i}">
-                <button class="faq-q" onclick="toggleFAQ(${i})">
-                    <span>${f.q}</span>
-                    <span class="faq-icon" id="faq-icon-${i}">+</span>
-                </button>
-                <div class="faq-a">${f.a}</div>
-            </div>
-        `).join('');
-    }
-
-    function toggleFAQ(i) {
-        const item = document.getElementById(`faq-${i}`);
-        const isOpen = item.classList.contains('open');
-        document.querySelectorAll('.faq-item').forEach(el => el.classList.remove('open'));
-        document.querySelectorAll('.faq-icon').forEach(el => el.textContent = '+');
-        if (!isOpen) {
-            item.classList.add('open');
-            document.getElementById(`faq-icon-${i}`).textContent = '-';
-        }
-    }
-
-    // ─── DEMO FALLBACK ───
-    function getDemoServices() {
-        return [
-            { id:1, service_name:'Esai & Makalah', category:'Tugas Akademik', price_min:35000, price_max:300000, description:'Dari SMP s/d Kuliah, riset & sitasi rapi, bahasa jelas dan mengalir.' },
-            { id:2, service_name:'PPT & Desain Canva + HyperLink', category:'Desain Visual', price_min:35000, price_max:350000, description:'Slide clean dan fokus visual, template konsisten, bisa tambah grafik interaktif.' },
-            { id:3, service_name:'Coding (HTML/CSS/JS/PHP/Python/C++)', category:'Pemrograman', price_min:50000, price_max:400000, description:'Struktur rapi dan runnable, komentar seperlunya, disertai cara menjalankan program.' },
-            { id:4, service_name:'Laporan PKL / Praktikum', category:'Tugas Akademik', price_min:60000, price_max:450000, description:'Struktur bab sesuai aturan kampus, tabel dan grafik rapi, lampiran lengkap.' },
-            { id:5, service_name:'CV Portofolio & Resume', category:'Desain Visual', price_min:80000, price_max:250000, description:'ATS-friendly dan ringkas, layout profesional, tersedia versi Bahasa Inggris dan Indonesia.' },
-            { id:6, service_name:'Kebutuhan Organisasi', category:'Organisasi', price_min:50000, price_max:400000, description:'Proposal, desain pamflet dan poster, LPJ, notulensi, dan surat resmi.' },
-            { id:7, service_name:'Joki Skripsi (per bab)', category:'Tugas Akademik', price_min:100000, price_max:900000, description:'Per bab, harga negosiasi, disertai referensi valid dan daftar pustaka.' },
-            { id:8, service_name:'Desain Poster Bisnis', category:'Desain Visual', price_min:25000, price_max:220000, description:'Ukuran IG, Print, atau Baliho. Cocok untuk promosi UMKM dan event organisasi.' },
-            { id:9, service_name:'Company Profile', category:'Dokumen Bisnis', price_min:100000, price_max:900000, description:'Format PDF dan Word, layout profesional, dilengkapi foto dan elemen grafis.' },
-            { id:10, service_name:'Paket Branding UMKM', category:'Bundling', price_min:200000, price_max:1500000, description:'Logo, poster, PPT company profile, dan IG kit dalam satu paket hemat.' },
-        ];
-    }
-
-    // ─── INIT ───
-    loadServices();
-    renderFAQ();
+  // ─── INIT ───
+  loadServices();
+  buildTesti();
 </script>
 </body>
 </html>
