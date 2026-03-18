@@ -318,7 +318,7 @@
   </div>
 </div>
 
-<!-- TESTIMONI MODAL – sekarang lengkap -->
+<!-- TESTIMONI MODAL – LENGKAP -->
 <div class="overlay" id="testi-modal">
   <div class="modal">
     <div class="modal-title" id="testi-modal-title">TAMBAH TESTIMONI</div>
@@ -333,10 +333,17 @@
           <label>Layanan *</label>
           <select id="ti-layanan" required>
             <option value="">--</option>
-            <option>Esai & Makalah</option><option>PPT & Desain Canva</option><option>Coding</option>
-            <option>Laporan PKL</option><option>CV Portofolio</option><option>Kebutuhan Organisasi</option>
-            <option>Joki Skripsi</option><option>Desain Poster</option><option>Company Profile</option>
-            <option>Paket Branding</option><option>Lainnya</option>
+            <option>Esai & Makalah</option>
+            <option>PPT & Desain Canva</option>
+            <option>Coding</option>
+            <option>Laporan PKL</option>
+            <option>CV Portofolio</option>
+            <option>Kebutuhan Organisasi</option>
+            <option>Joki Skripsi</option>
+            <option>Desain Poster</option>
+            <option>Company Profile</option>
+            <option>Paket Branding</option>
+            <option>Lainnya</option>
           </select>
         </div>
         <div>
@@ -356,7 +363,8 @@
       </div>
       <label>Review *</label>
       <textarea id="ti-teks" rows="4" placeholder="Cerita pengalaman klien..." required></textarea>
-      <label>Foto Klien <span style="font-weight:400;color:var(--muted);font-size:.7rem;">(opsional)</span></label>
+      <!-- FOTO -->
+      <label>Foto Klien <span style="font-weight:400;color:var(--muted);font-size:.7rem;">(opsional, upload ke Supabase Storage)</span></label>
       <img id="ti-foto-preview" class="foto-preview" alt="preview" />
       <input type="file" id="ti-foto-file" accept="image/jpeg,image/png,image/webp" onchange="previewFoto(this)" style="margin-bottom:10px;" />
       <input type="text" id="ti-foto-url" placeholder="Atau paste URL foto langsung[](https://...)" />
@@ -372,7 +380,7 @@
   </div>
 </div>
 
-<!-- KARYA MODAL – sekarang lengkap -->
+<!-- KARYA MODAL – LENGKAP -->
 <div class="overlay" id="karya-modal">
   <div class="modal">
     <div class="modal-title" id="karya-modal-title">TAMBAH KARYA</div>
@@ -389,6 +397,7 @@
       </select>
       <label>Deskripsi</label>
       <textarea id="ki-deskripsi" rows="3" placeholder="Deskripsi singkat karya ini..."></textarea>
+      <!-- FOTO -->
       <label>Foto Karya <span style="font-weight:400;color:var(--muted);font-size:.7rem;">(upload atau paste URL)</span></label>
       <img id="ki-foto-preview" class="foto-preview" alt="preview" />
       <input type="file" id="ki-foto-file" accept="image/jpeg,image/png,image/webp" onchange="previewKaryaFoto(this)" style="margin-bottom:10px;" />
@@ -498,7 +507,11 @@
       document.getElementById('admin-email').textContent = data.user.email;
       await Promise.all([loadOrders(), loadSvcs(), loadTesti(), loadKarya()]);
     } catch (error) {
-      err.textContent = error.message.includes("Invalid login credentials") ? "Email atau password salah." : "Gagal login: " + error.message;
+      err.textContent = error.message.includes("Invalid login credentials") 
+        ? "Email atau password salah." 
+        : error.message.includes("Email not confirmed") 
+          ? "Email belum dikonfirmasi. Cek inbox atau konfirmasi manual di Supabase." 
+          : "Gagal login: " + error.message;
       err.classList.add('show');
     } finally {
       btn.disabled = false; btn.textContent = 'MASUK KE DASHBOARD';
@@ -511,134 +524,107 @@
     document.getElementById('login-screen').style.display = 'flex';
   }
 
-  // NAV
+  // NAV & REFRESH
   function showSec(name) {
     ['orders','services','testi','karya','revenue'].forEach(s => {
       document.getElementById(`sec-${s}`).classList.toggle('sec-hidden', s !== name);
       document.getElementById(`nav-${s}`).classList.toggle('active', s === name);
     });
-    const titles = {
-      orders: 'ORDER MANAGEMENT',
-      services: 'MANAJEMEN LAYANAN',
-      testi: 'MANAJEMEN TESTIMONI',
-      karya: 'MANAJEMEN KARYA',
-      revenue: 'RINGKASAN PENDAPATAN'
-    };
+    const titles = { orders:'ORDER MANAGEMENT', services:'MANAJEMEN LAYANAN', testi:'MANAJEMEN TESTIMONI', karya:'MANAJEMEN KARYA', revenue:'RINGKASAN PENDAPATAN' };
     document.getElementById('topbar-title').textContent = titles[name];
     if (name === 'revenue') calcRev();
   }
 
-  function refresh() {
-    loadOrders(); loadSvcs(); loadTesti(); loadKarya();
-    toast('Data diperbarui');
-  }
+  function refresh() { loadOrders(); loadSvcs(); loadTesti(); loadKarya(); toast('Data diperbarui'); }
 
-  // ORDERS (fungsi asli, saya singkatkan penjelasan saja)
+  // ORDERS FUNCTIONS (full, tidak dipotong lagi)
   async function loadOrders() {
     const tbody = document.getElementById('tbody-orders');
     tbody.innerHTML = '<tr><td colspan="8" style="text-align:center;padding:28px;color:var(--muted);">Memuat...</td></tr>';
     try {
-      const { data, error } = await db.from('orders').select('*').order('id', { ascending: false });
+      const { data, error } = await db.from('orders').select('*').order('id', { ascending:false });
       if (error) throw error;
       orders = data || [];
-      updateStats();
-      filterOrders();
-    } catch (e) {
-      toast('Gagal memuat orders');
-    }
+    } catch { orders = []; toast('Gagal memuat orders'); }
+    updateStats(); filterOrders();
   }
 
   function updateStats() {
-    document.getElementById('s-all').textContent = orders.length;
-    document.getElementById('s-new').textContent = orders.filter(o => ['Baru','Pending'].includes(o.status)).length;
-    document.getElementById('s-prog').textContent = orders.filter(o => o.status === 'In Progress').length;
-    document.getElementById('s-done').textContent = orders.filter(o => o.status === 'Selesai').length;
+    document.getElementById('s-all').textContent  = orders.length;
+    document.getElementById('s-new').textContent  = orders.filter(o=>o.status==='Baru'||o.status==='Pending').length;
+    document.getElementById('s-prog').textContent = orders.filter(o=>o.status==='In Progress').length;
+    document.getElementById('s-done').textContent = orders.filter(o=>o.status==='Selesai').length;
   }
 
   function setF(s, btn) {
     curFilter = s;
     document.querySelectorAll('#sec-orders .ftab').forEach(b => b.classList.remove('active'));
-    btn.classList.add('active');
-    filterOrders();
+    btn.classList.add('active'); filterOrders();
   }
 
   function filterOrders() {
-    const q = document.getElementById('q-orders').value.toLowerCase();
+    const q = (document.getElementById('q-orders').value||'').toLowerCase();
     let list = orders;
     if (curFilter !== 'all') list = list.filter(o => o.status === curFilter);
-    if (q) list = list.filter(o =>
-      (o.customer_name||'').toLowerCase().includes(q) ||
-      (o.order_id||'').toLowerCase().includes(q) ||
-      (o.service_name||'').toLowerCase().includes(q)
-    );
+    if (q) list = list.filter(o => (o.customer_name||'').toLowerCase().includes(q)||(o.order_id||'').toLowerCase().includes(q)||(o.service_name||'').toLowerCase().includes(q));
     renderOrders(list);
     document.getElementById('tbl-foot-orders').textContent = `Menampilkan ${list.length} dari ${orders.length} order`;
   }
 
   function renderOrders(list) {
     const tbody = document.getElementById('tbody-orders');
-    if (!list.length) {
-      tbody.innerHTML = '<tr><td colspan="8" style="text-align:center;padding:28px;color:var(--muted);">Tidak ada order.</td></tr>';
-      return;
-    }
+    if (!list.length) { tbody.innerHTML='<tr><td colspan="8" style="text-align:center;padding:28px;color:var(--muted);">Tidak ada order.</td></tr>'; return; }
     tbody.innerHTML = list.map(o => `
       <tr>
         <td class="td-id">${o.order_id||'-'}</td>
         <td><div style="font-weight:700;">${o.customer_name||'-'}</div><div style="font-size:.7rem;color:var(--muted);">${o.whatsapp||''}</div></td>
         <td style="max-width:145px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;font-size:.78rem;">${o.service_name||'-'}</td>
         <td style="font-size:.76rem;color:var(--muted);white-space:nowrap;">${o.deadline||'-'}</td>
-        <td style="color:#e67e22;font-weight:600;">${o.price ? 'Rp ' + Number(o.price).toLocaleString('id-ID') : '-'}</td>
+        <td style="color:#e67e22;font-weight:600;">${o.price?'Rp '+Number(o.price).toLocaleString('id-ID'):'-'}</td>
         <td><select class="sel" onchange="updOrder(${o.id},'status',this.value)">${['Baru','In Progress','Review','Selesai'].map(s=>`<option value="${s}"${o.status===s?' selected':''}>${s}</option>`).join('')}</select></td>
         <td><select class="sel" onchange="updOrder(${o.id},'payment_status',this.value)">${['Belum Bayar','DP 50%','Lunas'].map(s=>`<option value="${s}"${o.payment_status===s?' selected':''}>${s}</option>`).join('')}</select></td>
         <td>
           <div class="act-btns">
             <button class="act" onclick="viewOrder(${o.id})">DETAIL</button>
-            <a href="https://wa.me/${o.whatsapp ? '62' + o.whatsapp.replace(/^0/,'') : '62895401087518'}?text=${encodeURIComponent('Halo! Update order ' + (o.order_id||''))}" target="_blank" class="act act-wa" style="text-decoration:none;">WA</a>
+            <a href="https://wa.me/${o.whatsapp?'62'+o.whatsapp.replace(/^0/,''):'62895401087518'}?text=${encodeURIComponent('Halo! Update order '+o.order_id+':')}" target="_blank" class="act act-wa" style="text-decoration:none;">WA</a>
             <button class="act act-del" onclick="delOrder(${o.id})">HAPUS</button>
           </div>
         </td>
-      </tr>
-    `).join('');
+      </tr>`).join('');
   }
 
   async function updOrder(id, field, val) {
     try {
-      const { error } = await db.from('orders').update({ [field]: val }).eq('id', id);
+      const { error } = await db.from('orders').update({ [field]:val }).eq('id', id);
       if (error) throw error;
-      const i = orders.findIndex(o => o.id === id);
-      if (i !== -1) orders[i][field] = val;
-      updateStats();
-      toast(field === 'status' ? 'Status diperbarui' : 'Pembayaran diperbarui');
-    } catch (e) {
-      toast('Gagal: ' + e.message);
-    }
+      const i = orders.findIndex(o=>o.id===id);
+      if (i!==-1) orders[i][field]=val;
+      updateStats(); toast(`${field==='status'?'Status':'Pembayaran'} diperbarui`);
+    } catch(e) { toast('Gagal: '+e.message); }
   }
 
   function viewOrder(id) {
-    const o = orders.find(o => o.id === id);
+    const o = orders.find(o=>o.id===id);
     if (!o) return;
-    const files = o.file_urls ? o.file_urls.split(',').map(u=>u.trim()).filter(Boolean).map((u,i) => 
-      `<a href="${u}" target="_blank" style="display:block;color:var(--primary);font-size:.8rem;margin-bottom:3px;">File ${i+1}: ${u.split('/').pop()}</a>`
-    ).join('') : '<span style="font-size:.8rem;color:var(--muted);">Tidak ada file</span>';
-
+    const files = o.file_urls ? o.file_urls.split(',').map(u=>u.trim()).filter(Boolean).map((u,i)=>`<a href="${u}" target="_blank" style="display:block;color:var(--primary);font-size:.8rem;margin-bottom:3px;">File ${i+1}: ${u.split('/').pop()}</a>`).join('') : '<span style="font-size:.8rem;color:var(--muted);">Tidak ada file</span>';
     document.getElementById('o-modal-body').innerHTML = `
       <div class="mg">
-        <div class="mf"><span>ID Order</span><span style="font-family:'Press Start 2P';font-size:.56rem;">${o.order_id}</span></div>
+        <div class="mf"><span>ID Order</span><span style="font-family:'Press Start 2P',cursive;font-size:.56rem;">${o.order_id}</span></div>
         <div class="mf"><span>Nama</span><span>${o.customer_name}</span></div>
         <div class="mf"><span>WhatsApp</span><span>${o.whatsapp}</span></div>
         <div class="mf"><span>Layanan</span><span>${o.service_name}</span></div>
         <div class="mf"><span>Deadline</span><span>${o.deadline||'-'}</span></div>
-        <div class="mf"><span>Harga</span><span style="color:#e67e22;">${o.price ? 'Rp '+Number(o.price).toLocaleString('id-ID') : '-'}</span></div>
+        <div class="mf"><span>Harga</span><span style="color:#e67e22;">${o.price?'Rp '+Number(o.price).toLocaleString('id-ID'):'-'}</span></div>
         <div class="mf"><span>Status</span><span>${o.status||'-'}</span></div>
         <div class="mf"><span>Pembayaran</span><span>${o.payment_status||'-'}</span></div>
-        <div class="mf"><span>Tanggal</span><span>${o.created_at ? new Date(o.created_at).toLocaleString('id-ID') : '-'}</span></div>
+        <div class="mf"><span>Tanggal</span><span>${o.created_at?new Date(o.created_at).toLocaleString('id-ID'):'-'}</span></div>
       </div>
       <div style="font-size:.68rem;color:var(--muted);margin-bottom:4px;">Detail Request</div>
       <div class="mdetail">${o.detail_request||'-'}</div>
       <div style="font-size:.68rem;color:var(--muted);margin-bottom:6px;">File Referensi</div>
       <div>${files}</div>
       <div class="mbtns" style="margin-top:12px;">
-        <a href="https://wa.me/${o.whatsapp ? '62'+o.whatsapp.replace(/^0/,'') : '62895401087518'}" target="_blank" style="display:inline-block;background:#25d366;color:white;padding:9px 14px;font-family:'Press Start 2P',cursive;font-size:.42rem;text-decoration:none;border:2px solid var(--primary);">CHAT KLIEN</a>
+        <a href="https://wa.me/${o.whatsapp?'62'+o.whatsapp.replace(/^0/,''):'62895401087518'}" target="_blank" style="display:inline-block;background:#25d366;color:white;padding:9px 14px;font-family:'Press Start 2P',cursive;font-size:.42rem;text-decoration:none;border:2px solid var(--primary);">CHAT KLIEN</a>
         <a href="track.html?id=${o.order_id}" target="_blank" style="display:inline-block;background:var(--bg);color:var(--primary);padding:9px 14px;font-family:'Press Start 2P',cursive;font-size:.42rem;text-decoration:none;border:2px solid var(--primary);">LIHAT TRACKER</a>
       </div>`;
     document.getElementById('o-modal').classList.add('open');
@@ -649,114 +635,71 @@
     try {
       const { error } = await db.from('orders').delete().eq('id', id);
       if (error) throw error;
-      orders = orders.filter(o => o.id !== id);
-      updateStats(); filterOrders();
-      toast('Order dihapus');
-    } catch (e) {
-      toast('Gagal: ' + e.message);
-    }
+      orders = orders.filter(o=>o.id!==id); updateStats(); filterOrders(); toast('Order dihapus');
+    } catch(e) { toast('Gagal: '+e.message); }
   }
 
-  // SERVICES
+  // SERVICES (full)
   async function loadSvcs() {
     try {
       const { data, error } = await db.from('services').select('*').order('id');
       if (error) throw error;
-      svcs = data || [];
-      renderSvcs();
-    } catch {
-      document.getElementById('svc-grid').innerHTML = '<p style="color:var(--muted);padding:18px;">Gagal memuat layanan.</p>';
-    }
+      svcs = data || []; renderSvcs();
+    } catch { document.getElementById('svc-grid').innerHTML='<p style="color:var(--muted);padding:18px;">Gagal memuat layanan.</p>'; }
   }
 
   function renderSvcs() {
     const grid = document.getElementById('svc-grid');
-    if (!svcs.length) {
-      grid.innerHTML = '<p style="color:var(--muted);padding:18px;">Belum ada layanan.</p>';
-      return;
-    }
+    if (!svcs.length) { grid.innerHTML='<p style="color:var(--muted);padding:18px;">Belum ada layanan.</p>'; return; }
     grid.innerHTML = svcs.map(s => `
       <div class="svc-card">
         <div style="font-size:.65rem;font-weight:700;color:var(--muted);margin-bottom:4px;">${s.category}</div>
         <div style="font-weight:700;font-size:.88rem;margin-bottom:4px;">${s.service_name}</div>
         <div class="pixel" style="font-size:.52rem;color:#e67e22;margin-bottom:7px;">Rp ${Math.round(s.price_min/1000)}K – ${Math.round(s.price_max/1000)}K</div>
         <div style="font-size:.76rem;color:var(--muted);line-height:1.5;margin-bottom:11px;">${s.description||'-'}</div>
-        <div style="display:flex;gap:7px;">
-          <button class="act" onclick="openSvcModal(${s.id})">EDIT</button>
-          <button class="act act-del" onclick="delSvc(${s.id})">HAPUS</button>
-        </div>
-      </div>
-    `).join('');
+        <div style="display:flex;gap:7px;"><button class="act" onclick="openSvcModal(${s.id})">EDIT</button><button class="act act-del" onclick="delSvc(${s.id})">HAPUS</button></div>
+      </div>`).join('');
   }
 
   function openSvcModal(id) {
-    const s = id ? svcs.find(x => x.id === id) : null;
+    const s = id ? svcs.find(x=>x.id===id) : null;
     document.getElementById('svc-modal-title').textContent = s ? 'EDIT LAYANAN' : 'TAMBAH LAYANAN';
-    document.getElementById('svc-id').value = s?.id || '';
-    document.getElementById('svc-name').value = s?.service_name || '';
-    document.getElementById('svc-cat').value = s?.category || '';
-    document.getElementById('svc-min').value = s?.price_min || '';
-    document.getElementById('svc-max').value = s?.price_max || '';
-    document.getElementById('svc-desc').value = s?.description || '';
+    document.getElementById('svc-id').value   = s?.id||'';
+    document.getElementById('svc-name').value = s?.service_name||'';
+    document.getElementById('svc-cat').value  = s?.category||'';
+    document.getElementById('svc-min').value  = s?.price_min||'';
+    document.getElementById('svc-max').value  = s?.price_max||'';
+    document.getElementById('svc-desc').value = s?.description||'';
     document.getElementById('svc-modal').classList.add('open');
   }
 
-  document.getElementById('svc-form').addEventListener('submit', async e => {
+  document.getElementById('svc-form')?.addEventListener('submit', async e => {
     e.preventDefault();
     const id = document.getElementById('svc-id').value;
-    const payload = {
-      service_name: document.getElementById('svc-name').value.trim(),
-      category: document.getElementById('svc-cat').value,
-      price_min: parseInt(document.getElementById('svc-min').value) || 0,
-      price_max: parseInt(document.getElementById('svc-max').value) || 0,
-      description: document.getElementById('svc-desc').value.trim()
-    };
+    const p  = { service_name:document.getElementById('svc-name').value.trim(), category:document.getElementById('svc-cat').value, price_min:parseInt(document.getElementById('svc-min').value)||0, price_max:parseInt(document.getElementById('svc-max').value)||0, description:document.getElementById('svc-desc').value.trim() };
     try {
-      if (id) {
-        const { error } = await db.from('services').update(payload).eq('id', id);
-        if (error) throw error;
-        toast('Layanan diperbarui');
-      } else {
-        const { error } = await db.from('services').insert([payload]);
-        if (error) throw error;
-        toast('Layanan ditambahkan');
-      }
-      closeM('svc-modal');
-      loadSvcs();
-    } catch (e) {
-      toast('Error: ' + e.message);
-    }
+      if (id) { const{error}=await db.from('services').update(p).eq('id',id); if(error)throw error; toast('Layanan diperbarui'); }
+      else     { const{error}=await db.from('services').insert([p]); if(error)throw error; toast('Layanan ditambahkan'); }
+      closeM('svc-modal'); loadSvcs();
+    } catch(e) { toast('Error: '+e.message); }
   });
 
   async function delSvc(id) {
     if (!confirm('Hapus layanan ini?')) return;
-    try {
-      const { error } = await db.from('services').delete().eq('id', id);
-      if (error) throw error;
-      toast('Layanan dihapus');
-      loadSvcs();
-    } catch (e) {
-      toast(e.message);
-    }
+    try { const{error}=await db.from('services').delete().eq('id',id); if(error)throw error; toast('Layanan dihapus'); loadSvcs(); } catch(e){toast(e.message);}
   }
 
-  // TESTIMONI
+  // TESTIMONI (full)
   async function loadTesti() {
     try {
-      const { data } = await db.from('testimonials').select('*').order('id', { ascending: false });
-      testis = data || [];
-      renderTestiAdmin();
-    } catch {
-      document.getElementById('testi-admin-grid').innerHTML = '<p style="color:var(--muted);padding:18px;">Gagal memuat testimoni.</p>';
-    }
+      const { data } = await db.from('testimonials').select('*').order('id', { ascending:false });
+      testis = data || []; renderTestiAdmin();
+    } catch { document.getElementById('testi-admin-grid').innerHTML='<p style="color:var(--muted);padding:18px;">Gagal memuat testimoni.</p>'; }
   }
 
   function renderTestiAdmin() {
     const grid = document.getElementById('testi-admin-grid');
-    if (!testis.length) {
-      grid.innerHTML = '<p style="color:var(--muted);padding:18px;">Belum ada testimoni.</p>';
-      return;
-    }
+    if (!testis.length) { grid.innerHTML='<p style="color:var(--muted);padding:18px;">Belum ada testimoni.</p>'; return; }
     grid.innerHTML = testis.map(t => `
       <div class="testi-admin-card">
         <div style="display:flex;align-items:flex-start;gap:10px;margin-bottom:10px;">
@@ -771,62 +714,48 @@
         <div style="display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:6px;">
           <span style="font-size:.7rem;padding:3px 8px;border:2px solid ${t.approved?'#4caf50':'#e53935'};background:${t.approved?'#e8f5e9':'#fff5f5'};color:${t.approved?'#2e7d32':'#c62828'};">${t.approved?'APPROVED':'PENDING'}</span>
           <div style="display:flex;gap:5px;">
-            ${!t.approved ? `<button class="act act-approve" onclick="approveTesti(${t.id})">APPROVE</button>` : ''}
+            ${!t.approved?`<button class="act act-approve" onclick="approveTesti(${t.id})">APPROVE</button>`:''}
             <button class="act" onclick="openTestiModal(${t.id})">EDIT</button>
             <button class="act act-del" onclick="delTesti(${t.id})">HAPUS</button>
           </div>
         </div>
-      </div>
-    `).join('');
+      </div>`).join('');
   }
 
   async function approveTesti(id) {
     try {
-      const { error } = await db.from('testimonials').update({ approved: true }).eq('id', id);
-      if (error) throw error;
-      toast('Testimoni diapprove');
-      loadTesti();
-    } catch (e) {
-      toast(e.message);
-    }
+      const{error}=await db.from('testimonials').update({approved:true}).eq('id',id);
+      if(error)throw error; toast('Testimoni diapprove'); loadTesti();
+    } catch(e){toast(e.message);}
   }
 
   function openTestiModal(id) {
-    const t = id ? testis.find(x => x.id === id) : null;
+    const t = id ? testis.find(x=>x.id===id) : null;
     document.getElementById('testi-modal-title').textContent = t ? 'EDIT TESTIMONI' : 'TAMBAH TESTIMONI';
-    document.getElementById('testi-id').value = t?.id || '';
-    document.getElementById('ti-nama').value = t?.nama || '';
-    document.getElementById('ti-asal').value = t?.asal || '';
-    document.getElementById('ti-layanan').value = t?.layanan || '';
-    document.getElementById('ti-kategori').value = t?.kategori || 'Tugas Akademik';
-    document.getElementById('ti-bintang').value = t?.bintang || 5;
-    document.getElementById('ti-tanggal').value = t?.tanggal || '';
-    document.getElementById('ti-teks').value = t?.teks || '';
-    document.getElementById('ti-foto-url').value = t?.foto_url || '';
-    document.getElementById('ti-approved').checked = t?.approved || false;
+    document.getElementById('testi-id').value     = t?.id||'';
+    document.getElementById('ti-nama').value      = t?.nama||'';
+    document.getElementById('ti-asal').value      = t?.asal||'';
+    document.getElementById('ti-layanan').value   = t?.layanan||'';
+    document.getElementById('ti-kategori').value  = t?.kategori||'Tugas Akademik';
+    document.getElementById('ti-bintang').value   = t?.bintang||5;
+    document.getElementById('ti-tanggal').value   = t?.tanggal||'';
+    document.getElementById('ti-teks').value      = t?.teks||'';
+    document.getElementById('ti-foto-url').value  = t?.foto_url||'';
+    document.getElementById('ti-approved').checked= t?.approved||false;
     const preview = document.getElementById('ti-foto-preview');
-    if (t?.foto_url) {
-      preview.src = t.foto_url;
-      preview.style.display = 'block';
-    } else {
-      preview.style.display = 'none';
-    }
+    if (t?.foto_url) { preview.src=t.foto_url; preview.style.display='block'; } else { preview.style.display='none'; }
     document.getElementById('testi-modal').classList.add('open');
   }
 
   function previewFoto(input) {
     if (input.files && input.files[0]) {
       const reader = new FileReader();
-      reader.onload = e => {
-        const p = document.getElementById('ti-foto-preview');
-        p.src = e.target.result;
-        p.style.display = 'block';
-      };
+      reader.onload = e => { const p=document.getElementById('ti-foto-preview'); p.src=e.target.result; p.style.display='block'; };
       reader.readAsDataURL(input.files[0]);
     }
   }
 
-  document.getElementById('testi-form').addEventListener('submit', async e => {
+  document.getElementById('testi-form')?.addEventListener('submit', async e => {
     e.preventDefault();
     const id = document.getElementById('testi-id').value;
     let fotoUrl = document.getElementById('ti-foto-url').value.trim();
@@ -837,75 +766,51 @@
         const f = fileInput.files[0];
         const path = `testimoni/${Date.now()}_${f.name}`;
         const { data, error } = await db.storage.from('order-files').upload(path, f);
-        if (error) throw error;
-        const { data: urlData } = db.storage.from('order-files').getPublicUrl(path);
-        fotoUrl = urlData.publicUrl;
-      } catch (err) {
-        console.warn("Upload foto gagal:", err);
-      }
+        if (!error && data) {
+          const { data: u } = db.storage.from('order-files').getPublicUrl(path);
+          fotoUrl = u.publicUrl;
+        }
+      } catch {}
     }
 
-    const payload = {
-      nama: document.getElementById('ti-nama').value.trim(),
-      asal: document.getElementById('ti-asal').value.trim(),
-      layanan: document.getElementById('ti-layanan').value,
+    const p = {
+      nama:     document.getElementById('ti-nama').value.trim(),
+      asal:     document.getElementById('ti-asal').value.trim(),
+      layanan:  document.getElementById('ti-layanan').value,
       kategori: document.getElementById('ti-kategori').value,
-      bintang: parseInt(document.getElementById('ti-bintang').value) || 5,
-      tanggal: document.getElementById('ti-tanggal').value.trim(),
-      teks: document.getElementById('ti-teks').value.trim(),
+      bintang:  parseInt(document.getElementById('ti-bintang').value)||5,
+      tanggal:  document.getElementById('ti-tanggal').value.trim(),
+      teks:     document.getElementById('ti-teks').value.trim(),
       foto_url: fotoUrl || null,
-      approved: document.getElementById('ti-approved').checked
+      approved: document.getElementById('ti-approved').checked,
     };
 
     try {
-      if (id) {
-        const { error } = await db.from('testimonials').update(payload).eq('id', id);
-        if (error) throw error;
-        toast('Testimoni diperbarui');
-      } else {
-        const { error } = await db.from('testimonials').insert([payload]);
-        if (error) throw error;
-        toast('Testimoni ditambahkan');
-      }
-      closeM('testi-modal');
-      loadTesti();
-    } catch (e) {
-      toast('Error: ' + e.message);
-    }
+      if (id) { const{error}=await db.from('testimonials').update(p).eq('id',id); if(error)throw error; toast('Testimoni diperbarui'); }
+      else     { const{error}=await db.from('testimonials').insert([p]); if(error)throw error; toast('Testimoni ditambahkan'); }
+      closeM('testi-modal'); loadTesti();
+    } catch(e) { toast('Error: '+e.message); }
   });
 
   async function delTesti(id) {
     if (!confirm('Hapus testimoni ini?')) return;
-    try {
-      const { error } = await db.from('testimonials').delete().eq('id', id);
-      if (error) throw error;
-      toast('Testimoni dihapus');
-      loadTesti();
-    } catch (e) {
-      toast(e.message);
-    }
+    try { const{error}=await db.from('testimonials').delete().eq('id',id); if(error)throw error; toast('Testimoni dihapus'); loadTesti(); } catch(e){toast(e.message);}
   }
 
-  // KARYA
+  // KARYA (full)
   async function loadKarya() {
     try {
-      const { data } = await db.from('portofolio').select('*').order('id', { ascending: false });
-      karyas = data || [];
-      renderKaryaAdmin();
-    } catch {
-      document.getElementById('karya-admin-grid').innerHTML = '<p style="color:var(--muted);padding:18px;">Gagal memuat karya.</p>';
-    }
+      const { data } = await db.from('portofolio').select('*').order('id', { ascending:false });
+      karyas = data || []; renderKaryaAdmin();
+    } catch { document.getElementById('karya-admin-grid').innerHTML='<p style="color:var(--muted);padding:18px;">Gagal memuat karya. Pastikan tabel "portofolio" sudah dibuat di Supabase.</p>'; }
   }
 
   function renderKaryaAdmin() {
     const grid = document.getElementById('karya-admin-grid');
-    if (!karyas.length) {
-      grid.innerHTML = '<p style="color:var(--muted);padding:18px;">Belum ada karya.</p>';
-      return;
-    }
+    if (!karyas.length) { grid.innerHTML='<p style="color:var(--muted);padding:18px;">Belum ada karya.</p>'; return; }
     grid.innerHTML = karyas.map(k => `
       <div class="karya-admin-card">
-        ${k.foto_url ? `<img src="${k.foto_url}" class="karya-admin-img" alt="${k.judul}" />` : `<div class="karya-admin-img" style="display:flex;align-items:center;justify-content:center;font-size:2rem;color:var(--muted);">📁</div>`}
+        ${k.foto_url ? `<img src="${k.foto_url}" class="karya-admin-img" alt="${k.judul}" />` : `<div class="karya-admin-img" style="display:flex;align-items:center;justify-content:center;font-size:2rem;color:var(--muted);">&#128196;</div>`}
         <div class="karya-admin-info">
           <div style="font-size:.65rem;font-weight:700;color:var(--muted);margin-bottom:4px;">${k.kategori}</div>
           <div style="font-weight:700;font-size:.86rem;margin-bottom:5px;">${k.judul}</div>
@@ -918,42 +823,32 @@
             </div>
           </div>
         </div>
-      </div>
-    `).join('');
+      </div>`).join('');
   }
 
   function openKaryaModal(id) {
-    const k = id ? karyas.find(x => x.id === id) : null;
+    const k = id ? karyas.find(x=>x.id===id) : null;
     document.getElementById('karya-modal-title').textContent = k ? 'EDIT KARYA' : 'TAMBAH KARYA';
-    document.getElementById('ki-id').value = k?.id || '';
-    document.getElementById('ki-judul').value = k?.judul || '';
-    document.getElementById('ki-kategori').value = k?.kategori || '';
-    document.getElementById('ki-deskripsi').value = k?.deskripsi || '';
-    document.getElementById('ki-foto-url').value = k?.foto_url || '';
-    document.getElementById('ki-published').checked = k?.published !== false;
+    document.getElementById('ki-id').value       = k?.id||'';
+    document.getElementById('ki-judul').value    = k?.judul||'';
+    document.getElementById('ki-kategori').value = k?.kategori||'';
+    document.getElementById('ki-deskripsi').value= k?.deskripsi||'';
+    document.getElementById('ki-foto-url').value = k?.foto_url||'';
+    document.getElementById('ki-published').checked = k?.published!==false;
     const preview = document.getElementById('ki-foto-preview');
-    if (k?.foto_url) {
-      preview.src = k.foto_url;
-      preview.style.display = 'block';
-    } else {
-      preview.style.display = 'none';
-    }
+    if (k?.foto_url) { preview.src=k.foto_url; preview.style.display='block'; } else { preview.style.display='none'; }
     document.getElementById('karya-modal').classList.add('open');
   }
 
   function previewKaryaFoto(input) {
     if (input.files && input.files[0]) {
       const reader = new FileReader();
-      reader.onload = e => {
-        const p = document.getElementById('ki-foto-preview');
-        p.src = e.target.result;
-        p.style.display = 'block';
-      };
+      reader.onload = e => { const p=document.getElementById('ki-foto-preview'); p.src=e.target.result; p.style.display='block'; };
       reader.readAsDataURL(input.files[0]);
     }
   }
 
-  document.getElementById('karya-form').addEventListener('submit', async e => {
+  document.getElementById('karya-form')?.addEventListener('submit', async e => {
     e.preventDefault();
     const id = document.getElementById('ki-id').value;
     let fotoUrl = document.getElementById('ki-foto-url').value.trim();
@@ -964,99 +859,57 @@
         const f = fileInput.files[0];
         const path = `portofolio/${Date.now()}_${f.name}`;
         const { data, error } = await db.storage.from('order-files').upload(path, f);
-        if (error) throw error;
-        const { data: urlData } = db.storage.from('order-files').getPublicUrl(path);
-        fotoUrl = urlData.publicUrl;
-      } catch (err) {
-        console.warn("Upload foto karya gagal:", err);
-      }
+        if (!error && data) {
+          const { data: u } = db.storage.from('order-files').getPublicUrl(path);
+          fotoUrl = u.publicUrl;
+        }
+      } catch {}
     }
 
-    const payload = {
-      judul: document.getElementById('ki-judul').value.trim(),
-      kategori: document.getElementById('ki-kategori').value,
+    const p = {
+      judul:     document.getElementById('ki-judul').value.trim(),
+      kategori:  document.getElementById('ki-kategori').value,
       deskripsi: document.getElementById('ki-deskripsi').value.trim(),
-      foto_url: fotoUrl || null,
-      published: document.getElementById('ki-published').checked
+      foto_url:  fotoUrl || null,
+      published: document.getElementById('ki-published').checked,
     };
 
     try {
-      if (id) {
-        const { error } = await db.from('portofolio').update(payload).eq('id', id);
-        if (error) throw error;
-        toast('Karya diperbarui');
-      } else {
-        const { error } = await db.from('portofolio').insert([payload]);
-        if (error) throw error;
-        toast('Karya ditambahkan');
-      }
-      closeM('karya-modal');
-      loadKarya();
-    } catch (e) {
-      toast('Error: ' + e.message);
-    }
+      if (id) { const{error}=await db.from('portofolio').update(p).eq('id',id); if(error)throw error; toast('Karya diperbarui'); }
+      else     { const{error}=await db.from('portofolio').insert([p]); if(error)throw error; toast('Karya ditambahkan'); }
+      closeM('karya-modal'); loadKarya();
+    } catch(e) { toast('Error: '+e.message); }
   });
 
   async function delKarya(id) {
     if (!confirm('Hapus karya ini?')) return;
-    try {
-      const { error } = await db.from('portofolio').delete().eq('id', id);
-      if (error) throw error;
-      toast('Karya dihapus');
-      loadKarya();
-    } catch (e) {
-      toast(e.message);
-    }
+    try { const{error}=await db.from('portofolio').delete().eq('id',id); if(error)throw error; toast('Karya dihapus'); loadKarya(); } catch(e){toast(e.message);}
   }
 
   // REVENUE
   function calcRev() {
-    const lunas = orders.filter(o => o.payment_status === 'Lunas').reduce((sum, o) => sum + (o.price || 0), 0);
-    const dp = orders.filter(o => o.payment_status === 'DP 50%').reduce((sum, o) => sum + ((o.price || 0) * 0.5), 0);
-    const unpaid = orders.filter(o => o.payment_status === 'Belum Bayar').length;
-
-    document.getElementById('r-lunas').textContent = 'Rp ' + lunas.toLocaleString('id-ID');
-    document.getElementById('r-dp').textContent = 'Rp ' + Math.round(dp).toLocaleString('id-ID');
-    document.getElementById('r-unpaid').textContent = unpaid + ' order';
-
-    const cnt = {};
-    orders.forEach(o => {
-      cnt[o.service_name] = (cnt[o.service_name] || 0) + 1;
-    });
-    const sorted = Object.entries(cnt).sort((a, b) => b[1] - a[1]).slice(0, 6);
-    const max = sorted[0]?.[1] || 1;
-
-    document.getElementById('top-svc').innerHTML = sorted.length ? sorted.map(([name, c]) => `
-      <div style="margin-bottom:11px;">
-        <div style="display:flex;justify-content:space-between;font-size:.8rem;margin-bottom:3px;">
-          <span>${name}</span><span style="font-weight:700;">${c}</span>
-        </div>
-        <div style="height:7px;background:var(--bg);">
-          <div style="height:100%;background:var(--primary);width:${(c / max) * 100}%;"></div>
-        </div>
-      </div>
-    `).join('') : '<p style="color:var(--muted);font-size:.82rem;">Belum ada data.</p>';
+    const lunas = orders.filter(o=>o.payment_status==='Lunas').reduce((s,o)=>s+(o.price||0),0);
+    const dp    = orders.filter(o=>o.payment_status==='DP 50%').reduce((s,o)=>s+((o.price||0)*.5),0);
+    const unpaid= orders.filter(o=>o.payment_status==='Belum Bayar').length;
+    document.getElementById('r-lunas').textContent = 'Rp '+lunas.toLocaleString('id-ID');
+    document.getElementById('r-dp').textContent    = 'Rp '+Math.round(dp).toLocaleString('id-ID');
+    document.getElementById('r-unpaid').textContent= unpaid+' order';
+    const cnt={};
+    orders.forEach(o=>{cnt[o.service_name]=(cnt[o.service_name]||0)+1;});
+    const sorted=Object.entries(cnt).sort((a,b)=>b[1]-a[1]).slice(0,6);
+    const max=sorted[0]?.[1]||1;
+    document.getElementById('top-svc').innerHTML=sorted.length?sorted.map(([name,c])=>`
+      <div style="margin-bottom:11px;"><div style="display:flex;justify-content:space-between;font-size:.8rem;margin-bottom:3px;"><span>${name}</span><span style="font-weight:700;">${c}</span></div>
+      <div style="height:7px;background:var(--bg);"><div style="height:100%;background:var(--primary);width:${(c/max)*100}%;"></div></div></div>`).join('')
+      :'<p style="color:var(--muted);font-size:.82rem;">Belum ada data.</p>';
   }
 
   // UTILS
-  function closeM(id) {
-    document.getElementById(id).classList.remove('open');
-  }
+  function closeM(id) { document.getElementById(id).classList.remove('open'); }
+  document.querySelectorAll('.overlay').forEach(m => m.addEventListener('click', e => { if(e.target===m) m.classList.remove('open'); }));
+  function toast(msg) { const t=document.getElementById('toast'); t.textContent=msg; t.classList.add('show'); setTimeout(()=>t.classList.remove('show'),2800); }
 
-  document.querySelectorAll('.overlay').forEach(m => {
-    m.addEventListener('click', e => {
-      if (e.target === m) closeM(m.id);
-    });
-  });
-
-  function toast(msg) {
-    const t = document.getElementById('toast');
-    t.textContent = msg;
-    t.classList.add('show');
-    setTimeout(() => t.classList.remove('show'), 2800);
-  }
-
-  // TAMBAH MANUAL ORDER
+  // TAMBAH MANUAL
   function openModal(id) {
     document.getElementById(id).classList.add('open');
   }
@@ -1110,7 +963,7 @@
     }
   }
 
-  // START
+  // INIT
   init();
 </script>
 </body>
