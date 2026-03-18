@@ -1,0 +1,120 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Login Admin | Tugasin Digital</title>
+  <link href="https://fonts.googleapis.com/css2?family=Press+Start+2P&family=Poppins:wght@400;600&display=swap" rel="stylesheet" />
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <style>
+    :root { --navy:#2a3a5a; --accent:#f4b41a; --bg:#f0f4f8; --err:#e53935; }
+    * { box-sizing:border-box; margin:0; padding:0; }
+    body {
+      font-family:'Poppins',sans-serif; background:var(--navy); min-height:100vh;
+      display:flex; align-items:center; justify-content:center; padding:20px;
+      background-image:linear-gradient(rgba(244,180,26,.05) 1px,transparent 1px),linear-gradient(90deg,rgba(244,180,26,.05) 1px,transparent 1px);
+      background-size:28px 28px;
+    }
+    .pixel { font-family:'Press Start 2P',cursive; }
+
+    .card {
+      background:white; border:4px solid var(--accent); box-shadow:10px 10px 0 var(--accent);
+      padding:40px 36px; width:100%; max-width:400px;
+    }
+
+    .logo { font-family:'Press Start 2P',cursive; font-size:1.1rem; color:var(--accent); text-align:center; margin-bottom:6px; }
+    .sub  { font-family:'Press Start 2P',cursive; font-size:.45rem; color:var(--navy); text-align:center; margin-bottom:6px; }
+    .desc { text-align:center; font-size:.78rem; color:var(--navy); opacity:.5; margin-bottom:28px; }
+
+    label { display:block; font-size:.8rem; font-weight:600; margin-bottom:5px; color:var(--navy); }
+    input {
+      width:100%; padding:11px 14px; border:2px solid #d0d8e8;
+      font-family:'Poppins',sans-serif; font-size:.9rem; color:var(--navy);
+      outline:none; margin-bottom:16px; transition:border-color .15s;
+    }
+    input:focus { border-color:var(--navy); }
+
+    .err-box { background:#fff5f5; border:2px solid #ef9a9a; padding:10px 14px; font-size:.82rem; color:#c62828; margin-bottom:16px; display:none; }
+    .err-box.show { display:block; }
+
+    .btn-login {
+      width:100%; padding:14px; background:var(--navy); color:white;
+      border:3px solid var(--navy); font-family:'Press Start 2P',cursive; font-size:.58rem;
+      cursor:pointer; box-shadow:5px 5px 0 var(--accent); transition:all .15s; margin-top:4px;
+    }
+    .btn-login:hover:not(:disabled) { background:var(--accent); color:var(--navy); box-shadow:7px 7px 0 var(--navy); }
+    .btn-login:disabled { opacity:.5; cursor:not-allowed; box-shadow:none; }
+
+    .back { display:block; text-align:center; margin-top:18px; font-size:.78rem; color:var(--navy); opacity:.45; text-decoration:none; transition:opacity .15s; }
+    .back:hover { opacity:.8; }
+
+    /* security badge */
+    .sec-badge {
+      display:flex; align-items:center; gap:8px; padding:10px 14px;
+      background:var(--bg); border:2px solid #d0d8e8; margin-bottom:24px;
+      font-size:.72rem; color:var(--navy);
+    }
+    .sec-icon { font-size:1rem; }
+  </style>
+</head>
+<body>
+
+<div class="card">
+  <div class="logo">TD</div>
+  <div class="sub">ADMIN PANEL</div>
+  <div class="desc">Tugasin Digital — Akses terbatas</div>
+
+  <div class="sec-badge">
+    <span class="sec-icon">&#128274;</span>
+    <span>Halaman ini hanya untuk owner. Login dengan akun Supabase Auth kamu.</span>
+  </div>
+
+  <div class="err-box" id="err-box">Email atau password salah. Coba lagi.</div>
+
+  <label>Email Admin</label>
+  <input type="email" id="email" placeholder="admin@tugasindigital.com" autocomplete="username" />
+
+  <label>Password</label>
+  <input type="password" id="pass" placeholder="••••••••" autocomplete="current-password"
+    onkeydown="if(event.key==='Enter')doLogin()" />
+
+  <button class="btn-login" id="btn" onclick="doLogin()">MASUK KE DASHBOARD</button>
+  <a href="index.html" class="back">← Kembali ke website</a>
+</div>
+
+<script>
+  const _URL = "https://zopnowgdpheylnvzjrlb.supabase.co";
+  const _KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InpvcG5vd2dkcGhleWxudnpqcmxiIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzM4MTE2MzAsImV4cCI6MjA4OTM4NzYzMH0.9VomavT2pF6vvjzVhC5HQVCMTidTesukGAqAnPC8UyI";
+  const db = supabase.createClient(_URL, _KEY);
+
+  // Redirect if already logged in
+  db.auth.getSession().then(({ data: { session } }) => {
+    if (session) location.replace('admin.html');
+  });
+
+  async function doLogin() {
+    const email = document.getElementById('email').value.trim();
+    const pass  = document.getElementById('pass').value;
+    const btn   = document.getElementById('btn');
+    const err   = document.getElementById('err-box');
+
+    if (!email || !pass) { err.textContent = 'Isi email dan password dulu.'; err.classList.add('show'); return; }
+
+    btn.disabled = true; btn.textContent = 'MASUK...'; err.classList.remove('show');
+
+    const { data, error } = await db.auth.signInWithPassword({ email, password: pass });
+
+    if (error) {
+      err.textContent = 'Email atau password salah. Coba lagi.';
+      err.classList.add('show');
+    } else {
+      btn.textContent = 'BERHASIL, REDIRECT...';
+      location.replace('admin.html');
+    }
+
+    btn.disabled = false;
+    if (btn.textContent !== 'BERHASIL, REDIRECT...') btn.textContent = 'MASUK KE DASHBOARD';
+  }
+</script>
+</body>
+</html>
