@@ -1,637 +1,466 @@
 <!DOCTYPE html>
 <html lang="id">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Order Sekarang | Tugasin Digital</title>
-    <link href="https://fonts.googleapis.com/css2?family=Press+Start+2P&family=Poppins:wght@400;500;600;700&display=swap" rel="stylesheet">
-    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Form Order | Tugasin Digital</title>
+  <link href="https://fonts.googleapis.com/css2?family=Press+Start+2P&family=Poppins:wght@400;500;600;700&display=swap" rel="stylesheet" />
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <style>
+    :root { --navy:#2a3a5a; --accent:#f4b41a; --bg:#f0f4f8; --white:#fff; --muted:#6b7a99; --err:#e53935; }
+    * { box-sizing:border-box; margin:0; padding:0; }
+    body { font-family:'Poppins',sans-serif; background:var(--bg); color:var(--navy); }
+    .pixel { font-family:'Press Start 2P',cursive; }
+    nav { background:var(--navy); height:56px; display:flex; align-items:center; padding:0 24px; justify-content:space-between; }
+    .nav-logo { font-family:'Press Start 2P',cursive; font-size:.65rem; color:var(--accent); text-decoration:none; }
+    .btn-back { font-family:'Press Start 2P',cursive; font-size:.45rem; color:rgba(255,255,255,.6); padding:7px 14px; border:2px solid rgba(255,255,255,.25); text-decoration:none; transition:all .15s; }
+    .btn-back:hover { color:var(--accent); border-color:var(--accent); }
 
-    <style>
-        :root {
-            --primary: #2a3a5a;
-            --accent:  #f4b41a;
-            --bg:      #f0f4f8;
-            --white:   #ffffff;
-            --muted:   #6b7a99;
-            --error:   #e53935;
-        }
-        * { box-sizing: border-box; margin: 0; padding: 0; }
-        body { font-family: 'Poppins', sans-serif; background: var(--bg); color: var(--primary); }
+    .page-header { background:var(--navy); padding:48px 24px 40px; text-align:center; position:relative; overflow:hidden; }
+    .page-header::before { content:''; position:absolute; inset:0; background-image:linear-gradient(rgba(244,180,26,.05) 1px,transparent 1px),linear-gradient(90deg,rgba(244,180,26,.05) 1px,transparent 1px); background-size:28px 28px; }
 
-        /* ── NAV ── */
-        nav {
-            background: var(--primary); padding: 0 24px;
-            display: flex; align-items: center; justify-content: space-between;
-            height: 56px; position: sticky; top: 0; z-index: 100;
-        }
-        .nav-logo { font-family: 'Press Start 2P', cursive; font-size: 0.65rem; color: var(--accent); text-decoration: none; }
-        .btn-back {
-            background: transparent; color: rgba(255,255,255,0.7); border: 2px solid rgba(255,255,255,0.25);
-            font-family: 'Press Start 2P', cursive; font-size: 0.45rem; padding: 7px 14px;
-            text-decoration: none; transition: all 0.15s;
-        }
-        .btn-back:hover { color: var(--accent); border-color: var(--accent); }
+    .layout { max-width:1000px; margin:0 auto; padding:36px 24px 64px; display:grid; grid-template-columns:1fr 300px; gap:24px; align-items:start; }
+    @media(max-width:768px){ .layout { grid-template-columns:1fr; } .sidebar-sticky { position:static !important; } }
 
-        /* ── PAGE HEADER ── */
-        .page-header {
-            background: var(--primary); padding: 48px 24px 40px; text-align: center;
-            position: relative; overflow: hidden;
-        }
-        .page-header::before {
-            content: '';
-            position: absolute; inset: 0;
-            background-image:
-                linear-gradient(rgba(244,180,26,0.05) 1px, transparent 1px),
-                linear-gradient(90deg, rgba(244,180,26,0.05) 1px, transparent 1px);
-            background-size: 28px 28px;
-        }
-        .page-header-content { position: relative; z-index: 1; }
-        .page-label { font-family: 'Press Start 2P', cursive; font-size: 0.45rem; color: rgba(255,255,255,0.4); letter-spacing: 2px; margin-bottom: 10px; }
-        .page-title { font-family: 'Press Start 2P', cursive; font-size: clamp(0.9rem, 2.5vw, 1.4rem); color: white; margin-bottom: 10px; line-height: 1.6; }
-        .page-title span { color: var(--accent); }
-        .page-sub { color: rgba(255,255,255,0.55); font-size: 0.9rem; }
+    .form-box { background:white; border:4px solid var(--navy); box-shadow:8px 8px 0 var(--navy); padding:30px; }
+    .sec-head { font-family:'Press Start 2P',cursive; font-size:.5rem; color:var(--navy); margin-bottom:18px; padding-bottom:10px; border-bottom:2px solid var(--bg); letter-spacing:1px; }
 
-        /* ── LAYOUT ── */
-        .order-layout {
-            max-width: 1000px; margin: 0 auto; padding: 40px 24px 64px;
-            display: grid; grid-template-columns: 1fr 320px; gap: 28px; align-items: start;
-        }
+    label { display:block; font-size:.82rem; font-weight:600; margin-bottom:5px; }
+    label .req { color:var(--err); margin-left:2px; }
+    label .hint { font-weight:400; color:var(--muted); font-size:.72rem; margin-left:4px; }
+    .field { margin-bottom:18px; }
+    .row2 { display:grid; grid-template-columns:1fr 1fr; gap:16px; }
+    @media(max-width:560px){ .row2 { grid-template-columns:1fr; } }
 
-        /* ── FORM BOX ── */
-        .form-box {
-            background: white; border: 4px solid var(--primary); box-shadow: 8px 8px 0 var(--primary); padding: 32px;
-        }
-        .form-section-title {
-            font-family: 'Press Start 2P', cursive; font-size: 0.55rem; color: var(--primary);
-            margin-bottom: 20px; padding-bottom: 10px; border-bottom: 2px solid var(--bg);
-            letter-spacing: 1px;
-        }
-        label { display: block; font-size: 0.82rem; font-weight: 600; color: var(--primary); margin-bottom: 6px; }
-        label .req { color: var(--error); margin-left: 2px; }
-        label .hint { font-weight: 400; color: var(--muted); font-size: 0.72rem; margin-left: 4px; }
-        .field { margin-bottom: 20px; }
+    input[type=text], input[type=tel], input[type=number], input[type=datetime-local], select, textarea {
+      width:100%; padding:11px 14px; border:2px solid #d0d8e8;
+      font-family:'Poppins',sans-serif; font-size:.9rem; color:var(--navy);
+      outline:none; transition:border-color .15s; background:white;
+    }
+    input:focus, select:focus, textarea:focus { border-color:var(--navy); }
+    input.err, select.err, textarea.err { border-color:var(--err); }
+    .err-msg { font-size:.72rem; color:var(--err); margin-top:3px; display:none; }
+    .err-msg.show { display:block; }
+    textarea { resize:vertical; min-height:96px; }
+    .char-ct { text-align:right; font-size:.7rem; color:var(--muted); margin-top:3px; }
 
-        input[type="text"], input[type="tel"], input[type="number"],
-        input[type="datetime-local"], select, textarea {
-            width: 100%; padding: 11px 14px; border: 2px solid #d0d8e8;
-            font-family: 'Poppins', sans-serif; font-size: 0.9rem; color: var(--primary);
-            background: white; outline: none; transition: border-color 0.15s;
-            appearance: auto;
-        }
-        input:focus, select:focus, textarea:focus { border-color: var(--primary); }
-        input.error, select.error, textarea.error { border-color: var(--error); }
-        .error-msg { font-size: 0.72rem; color: var(--error); margin-top: 4px; display: none; }
-        .error-msg.show { display: block; }
-        textarea { resize: vertical; min-height: 100px; }
-        .char-count { text-align: right; font-size: 0.7rem; color: var(--muted); margin-top: 3px; }
+    .id-box { background:var(--bg); border:2px solid var(--accent); padding:11px 14px; display:flex; align-items:center; justify-content:space-between; }
+    .id-val { font-family:'Press Start 2P',cursive; font-size:.6rem; color:var(--navy); }
+    .id-regen { background:none; border:none; font-size:.85rem; cursor:pointer; color:var(--muted); transition:color .15s; }
+    .id-regen:hover { color:var(--navy); }
 
-        .input-row { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; }
+    /* file upload */
+    .upload-area {
+      border:2px dashed #b0bcd4; padding:26px 20px; text-align:center;
+      cursor:pointer; transition:all .2s; background:var(--bg); position:relative;
+    }
+    .upload-area:hover, .upload-area.over { border-color:var(--navy); background:#e8eef5; }
+    .upload-area input { position:absolute; inset:0; opacity:0; cursor:pointer; width:100%; height:100%; }
+    .upload-icon { font-size:1.8rem; margin-bottom:6px; }
+    .upload-txt { font-size:.82rem; color:var(--muted); }
+    .upload-hint { font-size:.7rem; color:var(--muted); margin-top:3px; }
+    .file-list { margin-top:10px; display:flex; flex-direction:column; gap:5px; }
+    .file-item { display:flex; align-items:center; gap:10px; background:white; border:2px solid #d0d8e8; padding:8px 12px; }
+    .fi-name { flex:1; font-size:.82rem; font-weight:600; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; }
+    .fi-size { font-size:.72rem; color:var(--muted); white-space:nowrap; }
+    .fi-rm { background:none; border:none; color:var(--err); font-size:1rem; cursor:pointer; padding:0 4px; flex-shrink:0; }
 
-        /* ── ID ORDER DISPLAY ── */
-        .order-id-display {
-            background: var(--bg); border: 2px solid var(--accent);
-            padding: 12px 16px; display: flex; align-items: center; justify-content: space-between;
-        }
-        .order-id-display .id-val {
-            font-family: 'Press Start 2P', cursive; font-size: 0.6rem; color: var(--primary);
-        }
-        .id-refresh {
-            background: none; border: none; font-size: 0.75rem; cursor: pointer; color: var(--muted);
-            transition: color 0.15s;
-        }
-        .id-refresh:hover { color: var(--primary); }
+    /* terms */
+    .terms-box { background:var(--bg); border:2px solid #d0d8e8; padding:16px; }
+    .terms-box ul { padding-left:16px; font-size:.82rem; color:var(--muted); line-height:1.9; }
+    .check-row { display:flex; align-items:flex-start; gap:10px; margin-top:12px; cursor:pointer; }
+    .check-row input { width:18px; height:18px; flex-shrink:0; margin-top:1px; accent-color:var(--navy); }
+    .check-row span { font-size:.85rem; font-weight:500; }
 
-        /* ── FILE UPLOAD ── */
-        .file-upload-area {
-            border: 2px dashed #b0bcd4; padding: 28px 20px; text-align: center;
-            cursor: pointer; transition: all 0.2s; background: var(--bg);
-            position: relative;
-        }
-        .file-upload-area:hover, .file-upload-area.dragover {
-            border-color: var(--primary); background: #e8eef5;
-        }
-        .file-upload-area input[type="file"] {
-            position: absolute; inset: 0; opacity: 0; cursor: pointer; width: 100%; height: 100%;
-        }
-        .upload-icon { font-size: 2rem; margin-bottom: 8px; }
-        .upload-text { font-size: 0.82rem; color: var(--muted); line-height: 1.5; }
-        .upload-text strong { color: var(--primary); }
-        .upload-hint { font-size: 0.7rem; color: var(--muted); margin-top: 4px; }
+    .btn-submit { width:100%; padding:15px; background:var(--navy); color:white; border:3px solid var(--navy); font-family:'Press Start 2P',cursive; font-size:.62rem; cursor:pointer; box-shadow:5px 5px 0 var(--accent); transition:all .15s; }
+    .btn-submit:hover:not(:disabled) { background:var(--accent); color:var(--navy); box-shadow:7px 7px 0 var(--navy); }
+    .btn-submit:disabled { opacity:.5; cursor:not-allowed; box-shadow:none; }
 
-        .file-list { margin-top: 12px; display: flex; flex-direction: column; gap: 6px; }
-        .file-item {
-            display: flex; align-items: center; justify-content: space-between; gap: 10px;
-            background: white; border: 2px solid #d0d8e8; padding: 8px 12px;
-        }
-        .file-item-name { font-size: 0.82rem; font-weight: 600; flex: 1; min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
-        .file-item-size { font-size: 0.72rem; color: var(--muted); white-space: nowrap; }
-        .file-remove { background: none; border: none; color: var(--error); cursor: pointer; font-size: 1rem; padding: 0 4px; flex-shrink: 0; }
+    /* sidebar */
+    .sidebar-sticky { position:sticky; top:68px; display:flex; flex-direction:column; gap:18px; }
+    .info-box { background:white; border:3px solid var(--navy); padding:18px; box-shadow:5px 5px 0 var(--navy); }
+    .info-box h4 { font-family:'Press Start 2P',cursive; font-size:.48rem; color:var(--navy); margin-bottom:14px; }
+    .step-info { display:flex; gap:10px; margin-bottom:10px; align-items:flex-start; }
+    .si-num { width:26px; height:26px; background:var(--navy); color:var(--accent); font-family:'Press Start 2P',cursive; font-size:.5rem; display:flex; align-items:center; justify-content:center; flex-shrink:0; }
+    .si-txt { font-size:.78rem; color:var(--muted); line-height:1.55; }
+    .si-txt strong { color:var(--navy); display:block; margin-bottom:2px; }
+    .cta-box { background:var(--accent); border:3px solid var(--navy); padding:18px; box-shadow:5px 5px 0 var(--navy); }
+    .cta-box h4 { font-family:'Press Start 2P',cursive; font-size:.48rem; color:var(--navy); margin-bottom:10px; }
+    .btn-wa { display:block; background:#25d366; color:white; text-align:center; padding:10px; font-family:'Press Start 2P',cursive; font-size:.48rem; text-decoration:none; border:2px solid var(--navy); transition:background .15s; }
+    .btn-wa:hover { background:#1da851; }
 
-        /* ── TERMS ── */
-        .terms-box {
-            background: var(--bg); border: 2px solid #d0d8e8; padding: 16px 18px; margin-bottom: 20px;
-        }
-        .terms-box ul { padding-left: 18px; font-size: 0.82rem; color: var(--muted); line-height: 1.9; }
-        .checkbox-row { display: flex; align-items: flex-start; gap: 10px; margin-top: 14px; cursor: pointer; }
-        .checkbox-row input[type="checkbox"] { width: 18px; height: 18px; flex-shrink: 0; margin-top: 1px; accent-color: var(--primary); }
-        .checkbox-row span { font-size: 0.85rem; font-weight: 500; }
-
-        /* ── SUBMIT BTN ── */
-        button[type="submit"] {
-            width: 100%; padding: 16px; background: var(--primary); color: white;
-            border: 3px solid var(--primary); font-family: 'Press Start 2P', cursive;
-            font-size: 0.65rem; cursor: pointer; transition: all 0.15s; box-shadow: 5px 5px 0 var(--accent);
-        }
-        button[type="submit"]:hover:not(:disabled) {
-            background: var(--accent); color: var(--primary);
-            box-shadow: 7px 7px 0 var(--primary);
-        }
-        button[type="submit"]:disabled { opacity: 0.5; cursor: not-allowed; box-shadow: none; }
-
-        /* ── SIDEBAR ── */
-        .sidebar-sticky { position: sticky; top: 72px; display: flex; flex-direction: column; gap: 20px; }
-        .info-box {
-            background: white; border: 3px solid var(--primary); padding: 20px;
-            box-shadow: 5px 5px 0 var(--primary);
-        }
-        .info-box h4 { font-family: 'Press Start 2P', cursive; font-size: 0.5rem; color: var(--primary); margin-bottom: 14px; }
-        .info-step { display: flex; gap: 12px; margin-bottom: 12px; align-items: flex-start; }
-        .info-step-num {
-            width: 28px; height: 28px; background: var(--primary); color: var(--accent);
-            font-family: 'Press Start 2P', cursive; font-size: 0.6rem;
-            display: flex; align-items: center; justify-content: center; flex-shrink: 0;
-        }
-        .info-step-text { font-size: 0.8rem; color: var(--muted); line-height: 1.55; }
-        .info-step-text strong { color: var(--primary); display: block; margin-bottom: 2px; }
-
-        .contact-box {
-            background: var(--accent); border: 3px solid var(--primary); padding: 20px;
-            box-shadow: 5px 5px 0 var(--primary);
-        }
-        .contact-box h4 { font-family: 'Press Start 2P', cursive; font-size: 0.5rem; color: var(--primary); margin-bottom: 12px; }
-        .contact-box p { font-size: 0.82rem; color: var(--primary); margin-bottom: 12px; line-height: 1.6; }
-        .btn-wa {
-            display: block; background: #25d366; color: white; text-align: center;
-            padding: 10px; font-family: 'Press Start 2P', cursive; font-size: 0.5rem;
-            text-decoration: none; border: 2px solid var(--primary); transition: all 0.15s;
-        }
-        .btn-wa:hover { background: #1da851; }
-
-        /* ── SUCCESS MODAL ── */
-        .modal-overlay {
-            position: fixed; inset: 0; background: rgba(42,58,90,0.85);
-            z-index: 200; display: none; align-items: center; justify-content: center; padding: 20px;
-        }
-        .modal-overlay.open { display: flex; }
-        .modal-box {
-            background: white; border: 4px solid var(--primary); box-shadow: 10px 10px 0 var(--accent);
-            padding: 40px; max-width: 480px; width: 100%; text-align: center;
-        }
-        .modal-icon { font-size: 3rem; margin-bottom: 16px; }
-        .modal-title { font-family: 'Press Start 2P', cursive; font-size: 0.85rem; color: var(--primary); margin-bottom: 8px; line-height: 1.7; }
-        .modal-id { font-family: 'Press Start 2P', cursive; font-size: 0.7rem; color: #e67e22; margin: 16px 0; padding: 12px; background: var(--bg); border: 2px solid var(--accent); }
-        .modal-body { font-size: 0.85rem; color: var(--muted); margin-bottom: 24px; line-height: 1.7; }
-        .modal-btns { display: flex; flex-direction: column; gap: 10px; }
-        .btn-modal-main {
-            display: block; background: #25d366; color: white; padding: 14px;
-            font-family: 'Press Start 2P', cursive; font-size: 0.6rem; text-decoration: none;
-            border: 3px solid var(--primary); transition: background 0.15s;
-        }
-        .btn-modal-main:hover { background: #1da851; }
-        .btn-modal-sec {
-            display: block; background: white; color: var(--primary); padding: 12px;
-            font-family: 'Press Start 2P', cursive; font-size: 0.55rem; text-decoration: none;
-            border: 3px solid var(--primary); transition: background 0.15s;
-        }
-        .btn-modal-sec:hover { background: var(--bg); }
-
-        /* ── RESPONSIVE ── */
-        @media(max-width: 768px) {
-            .order-layout { grid-template-columns: 1fr; }
-            .sidebar-sticky { position: static; }
-            .input-row { grid-template-columns: 1fr; }
-        }
-    </style>
+    /* success modal */
+    .modal-overlay { position:fixed; inset:0; background:rgba(42,58,90,.85); z-index:200; display:none; align-items:center; justify-content:center; padding:20px; }
+    .modal-overlay.open { display:flex; }
+    .modal-box { background:white; border:4px solid var(--navy); box-shadow:10px 10px 0 var(--accent); padding:36px; max-width:460px; width:100%; text-align:center; }
+    .modal-title { font-family:'Press Start 2P',cursive; font-size:.8rem; color:var(--navy); margin-bottom:8px; line-height:1.7; }
+    .modal-id { font-family:'Press Start 2P',cursive; font-size:.68rem; color:#e67e22; padding:12px; background:var(--bg); border:2px solid var(--accent); margin:14px 0; }
+    .modal-body { font-size:.85rem; color:var(--muted); margin-bottom:22px; line-height:1.7; }
+  </style>
 </head>
 <body>
 
 <nav>
-    <a href="index.html" class="nav-logo">TUGASIN DIGITAL</a>
-    <a href="index.html" class="btn-back">← KEMBALI</a>
+  <a href="index.html" class="nav-logo">TUGASIN DIGITAL</a>
+  <a href="index.html" class="btn-back">← KEMBALI</a>
 </nav>
 
 <div class="page-header">
-    <div class="page-header-content">
-        <div class="page-label">// FORM PEMESANAN</div>
-        <h1 class="page-title">ORDER <span>SEKARANG</span></h1>
-        <p class="page-sub">Isi form di bawah — konfirmasi masuk ke WA kamu dalam kurang dari 5 menit</p>
-    </div>
+  <div style="position:relative;z-index:1;">
+    <div class="pixel" style="font-size:.45rem;color:rgba(255,255,255,.4);letter-spacing:2px;margin-bottom:10px;">// FORM PEMESANAN</div>
+    <h1 class="pixel" style="color:white;font-size:clamp(.9rem,2.5vw,1.4rem);line-height:1.6;margin-bottom:8px;">ORDER <span style="color:var(--accent);">SEKARANG</span></h1>
+    <p style="color:rgba(255,255,255,.55);font-size:.9rem;">Konfirmasi masuk ke WA kamu dalam kurang dari 5 menit</p>
+  </div>
 </div>
 
-<div class="order-layout">
+<div class="layout">
 
-    <!-- MAIN FORM -->
-    <div class="form-box">
-        <form id="order-form" novalidate>
+  <!-- FORM -->
+  <div class="form-box">
+    <form id="order-form" novalidate>
 
-            <!-- ID Order -->
-            <div class="field">
-                <label>ID Order <span class="hint">(otomatis)</span></label>
-                <div class="order-id-display">
-                    <span class="id-val" id="order-id-val">TD-LOADING...</span>
-                    <button type="button" class="id-refresh" onclick="genOrderId()" title="Generate ulang">&#8635;</button>
-                </div>
-                <div style="font-size:0.7rem; color:var(--muted); margin-top:4px">Simpan ID ini untuk cek status order di homepage.</div>
-            </div>
+      <!-- ID Order -->
+      <div class="field">
+        <label>ID Order <span class="hint">(otomatis)</span></label>
+        <div class="id-box">
+          <span class="id-val" id="id-display">TD-LOADING...</span>
+          <button type="button" class="id-regen" onclick="genId()" title="Generate ulang">&#8635;</button>
+        </div>
+        <p style="font-size:.7rem;color:var(--muted);margin-top:4px;">Simpan ID ini untuk cek status order di <a href="track.html" style="color:var(--navy);font-weight:700;">track.html</a></p>
+      </div>
 
-            <div class="form-section-title">DATA DIRI</div>
+      <div class="sec-head">DATA DIRI</div>
 
-            <div class="input-row">
-                <div class="field">
-                    <label>Nama Lengkap <span class="req">*</span></label>
-                    <input type="text" id="customer_name" placeholder="Nama kamu" maxlength="80">
-                    <div class="error-msg" id="err-name">Nama wajib diisi</div>
-                </div>
-                <div class="field">
-                    <label>Nomor WhatsApp <span class="req">*</span></label>
-                    <input type="tel" id="whatsapp" placeholder="08xxxxxxxxxx" maxlength="16">
-                    <div class="error-msg" id="err-wa">Format WA tidak valid (08xxx)</div>
-                </div>
-            </div>
+      <div class="row2">
+        <div class="field">
+          <label>Nama Lengkap <span class="req">*</span></label>
+          <input type="text" id="name" placeholder="Nama kamu" maxlength="80" />
+          <div class="err-msg" id="e-name">Nama wajib diisi</div>
+        </div>
+        <div class="field">
+          <label>Nomor WhatsApp <span class="req">*</span></label>
+          <input type="tel" id="wa" placeholder="08xxxxxxxxxx" maxlength="16" />
+          <div class="err-msg" id="e-wa">Format tidak valid (08xxx)</div>
+        </div>
+      </div>
 
-            <div class="form-section-title" style="margin-top:8px">DETAIL PESANAN</div>
+      <div class="sec-head" style="margin-top:8px;">DETAIL PESANAN</div>
 
-            <div class="field">
-                <label>Pilih Layanan <span class="req">*</span></label>
-                <select id="service_name" onchange="onServiceChange()">
-                    <option value="">-- Pilih Layanan --</option>
-                </select>
-                <div id="price-hint" style="font-size:0.72rem; color:#e67e22; margin-top:5px; display:none; font-weight:600"></div>
-                <div class="error-msg" id="err-service">Pilih layanan terlebih dahulu</div>
-            </div>
+      <div class="field">
+        <label>Pilih Layanan <span class="req">*</span></label>
+        <select id="service" onchange="onSvcChange()">
+          <option value="">-- Pilih Layanan --</option>
+        </select>
+        <div id="price-hint" style="font-size:.72rem;color:#e67e22;margin-top:4px;font-weight:600;display:none;"></div>
+        <div class="err-msg" id="e-svc">Pilih layanan terlebih dahulu</div>
+      </div>
 
-            <div class="input-row">
-                <div class="field">
-                    <label>Deadline <span class="req">*</span></label>
-                    <input type="datetime-local" id="deadline">
-                    <div class="error-msg" id="err-deadline">Deadline wajib diisi</div>
-                </div>
-                <div class="field">
-                    <label>Estimasi Budget <span class="hint">(opsional)</span></label>
-                    <input type="number" id="price" placeholder="Kosongkan jika belum tahu" min="0">
-                </div>
-            </div>
+      <div class="row2">
+        <div class="field">
+          <label>Deadline <span class="req">*</span></label>
+          <input type="datetime-local" id="deadline" />
+          <div class="err-msg" id="e-dl">Deadline wajib diisi</div>
+        </div>
+        <div class="field">
+          <label>Estimasi Budget <span class="hint">(opsional)</span></label>
+          <input type="number" id="price" placeholder="Kosongkan jika belum tahu" min="0" />
+        </div>
+      </div>
 
-            <div class="field">
-                <label>Detail Request <span class="req">*</span> <span class="hint">— min. 20 karakter</span></label>
-                <textarea id="detail_request" maxlength="1500" oninput="updateCharCount()"
-                    placeholder="Contoh:
-- Topik / judul tugas
-- Jumlah halaman / slide / baris kode
-- Format yang diminta (APA, IEEE, dll)
-- Referensi atau contoh yang harus diikuti
-- Catatan khusus lainnya"></textarea>
-                <div class="char-count"><span id="char-now">0</span> / 1500</div>
-                <div class="error-msg" id="err-detail">Detail request wajib diisi (min. 20 karakter)</div>
-            </div>
+      <div class="field">
+        <label>Detail Request <span class="req">*</span></label>
+        <textarea id="detail" maxlength="1500" oninput="updChar()"
+          placeholder="Topik/judul, jumlah halaman/slide, format, referensi, catatan khusus..."></textarea>
+        <div class="char-ct"><span id="char-now">0</span> / 1500</div>
+        <div class="err-msg" id="e-det">Detail request wajib diisi (min. 20 karakter)</div>
+      </div>
 
-            <!-- FILE UPLOAD -->
-            <div class="field">
-                <label>Upload File Referensi <span class="hint">(opsional, maks 3 file · 5MB/file)</span></label>
-                <div class="file-upload-area" id="upload-area">
-                    <input type="file" id="file-input" multiple accept=".pdf,.doc,.docx,.ppt,.pptx,.xls,.xlsx,.jpg,.jpeg,.png,.zip,.txt" onchange="handleFiles(this.files)">
-                    <div class="upload-icon">&#128196;</div>
-                    <div class="upload-text"><strong>Klik atau drop file di sini</strong><br>PDF, Word, PPT, Excel, gambar, ZIP</div>
-                    <div class="upload-hint">Maks 3 file, 5MB per file</div>
-                </div>
-                <div class="file-list" id="file-list"></div>
-                <div class="error-msg" id="err-file"></div>
-            </div>
+      <!-- FILE UPLOAD -->
+      <div class="field">
+        <label>Upload File Referensi <span class="hint">(opsional · maks 3 file · 5MB/file)</span></label>
+        <div class="upload-area" id="upload-area">
+          <input type="file" id="file-input" multiple accept=".pdf,.doc,.docx,.ppt,.pptx,.jpg,.jpeg,.png,.zip,.txt" onchange="handleFiles(this.files)" />
+          <div class="upload-icon">&#128196;</div>
+          <div class="upload-txt"><strong>Klik atau drag & drop file di sini</strong></div>
+          <div class="upload-hint">PDF, Word, PPT, gambar, ZIP — maks 3 file</div>
+        </div>
+        <div class="file-list" id="file-list"></div>
+        <div class="err-msg" id="e-file"></div>
+      </div>
 
-            <!-- TERMS -->
-            <div class="terms-box">
-                <div style="font-family:'Press Start 2P',cursive; font-size:0.45rem; color:var(--primary); margin-bottom:10px">KETENTUAN ORDER</div>
-                <ul>
-                    <li>DP 50% wajib sebelum pengerjaan dimulai</li>
-                    <li>Deadline dihitung sejak DP dikonfirmasi, bukan sejak brief masuk</li>
-                    <li>Revisi gratis: 2x desain / 1x penulisan dalam 1x24 jam</li>
-                    <li>File dikirim via Google Drive setelah pelunasan</li>
-                    <li>Data dan brief kamu dijaga kerahasiaannya sepenuhnya</li>
-                </ul>
-                <label class="checkbox-row">
-                    <input type="checkbox" id="agree">
-                    <span>Saya sudah membaca dan menyetujui ketentuan di atas</span>
-                </label>
-                <div class="error-msg" id="err-agree">Centang persetujuan untuk melanjutkan</div>
-            </div>
+      <!-- TERMS -->
+      <div class="terms-box" style="margin-bottom:18px;">
+        <div class="pixel" style="font-size:.43rem;color:var(--navy);margin-bottom:10px;">KETENTUAN ORDER</div>
+        <ul>
+          <li>DP 50% wajib sebelum pengerjaan dimulai</li>
+          <li>Deadline dihitung sejak DP dikonfirmasi</li>
+          <li>Revisi gratis: 2x desain / 1x penulisan dalam 24 jam</li>
+          <li>File dikirim via Google Drive setelah pelunasan</li>
+          <li>Data dan brief kamu dijaga kerahasiaannya</li>
+        </ul>
+        <label class="check-row">
+          <input type="checkbox" id="agree" />
+          <span>Saya sudah membaca dan menyetujui ketentuan di atas</span>
+        </label>
+        <div class="err-msg" id="e-agree">Centang persetujuan untuk melanjutkan</div>
+      </div>
 
-            <button type="submit" id="submit-btn">KIRIM ORDER</button>
+      <button type="submit" class="btn-submit" id="submit-btn">KIRIM ORDER</button>
 
-        </form>
+    </form>
+  </div>
+
+  <!-- SIDEBAR -->
+  <div class="sidebar-sticky">
+    <div class="info-box">
+      <h4>ALUR ORDER</h4>
+      <div class="step-info"><div class="si-num">1</div><div class="si-txt"><strong>Isi Form</strong>Kirim detail tugas dan deadline.</div></div>
+      <div class="step-info"><div class="si-num">2</div><div class="si-txt"><strong>Konfirmasi WA</strong>Tim konfirmasi harga final dan DP.</div></div>
+      <div class="step-info"><div class="si-num">3</div><div class="si-txt"><strong>DP 50%</strong>Transfer DP, pengerjaan langsung dimulai.</div></div>
+      <div class="step-info" style="margin-bottom:0;"><div class="si-num">4</div><div class="si-txt"><strong>Terima File</strong>Bayar pelunasan, revisi gratis 2x.</div></div>
     </div>
-
-    <!-- SIDEBAR -->
-    <div class="sidebar-sticky">
-
-        <div class="info-box">
-            <h4>ALUR ORDER</h4>
-            <div class="info-step">
-                <div class="info-step-num">1</div>
-                <div class="info-step-text"><strong>Isi Form</strong>Kirim detail tugas, deadline, dan file referensi kamu.</div>
-            </div>
-            <div class="info-step">
-                <div class="info-step-num">2</div>
-                <div class="info-step-text"><strong>Konfirmasi WA</strong>Tim konfirmasi harga final dan detail DP via WhatsApp.</div>
-            </div>
-            <div class="info-step">
-                <div class="info-step-num">3</div>
-                <div class="info-step-text"><strong>DP 50%</strong>Transfer DP, pengerjaan langsung dimulai setelah dikonfirmasi.</div>
-            </div>
-            <div class="info-step" style="margin-bottom:0">
-                <div class="info-step-num">4</div>
-                <div class="info-step-text"><strong>Terima File</strong>File dikirim via Google Drive, bayar pelunasan, revisi gratis.</div>
-            </div>
-        </div>
-
-        <div class="contact-box">
-            <h4>MASIH RAGU?</h4>
-            <p>Chat langsung sebelum order, kita bantu tentukan layanan yang paling sesuai.</p>
-            <a href="https://wa.me/6289540108751?text=Halo%20Tugasin%20Digital!%20Saya%20mau%20konsultasi%20dulu." target="_blank" class="btn-wa">CHAT WHATSAPP</a>
-        </div>
-
-        <div class="info-box" style="background:var(--accent); border-color:var(--primary)">
-            <h4>RESPONSE TIME</h4>
-            <p style="font-size:2rem; font-family:'Press Start 2P',cursive; color:var(--primary); margin:8px 0">&lt;5 MIN</p>
-            <p style="font-size:0.8rem; color:rgba(42,58,90,0.7)">Konfirmasi masuk ke WhatsApp kamu setelah form dikirim.</p>
-        </div>
-
+    <div class="cta-box">
+      <h4>MASIH RAGU?</h4>
+      <p style="font-size:.8rem;color:rgba(42,58,90,.7);margin-bottom:12px;line-height:1.6;">Chat dulu sebelum order, kami bantu tentukan layanan yang paling sesuai.</p>
+      <a href="https://wa.me/6289540108751?text=Halo%20Tugasin%20Digital!%20Mau%20konsultasi%20dulu." target="_blank" class="btn-wa">CHAT WHATSAPP</a>
     </div>
+    <div class="info-box" style="background:var(--accent);border-color:var(--navy);">
+      <div class="pixel" style="font-size:.45rem;color:var(--navy);margin-bottom:6px;">RESPONSE TIME</div>
+      <div class="pixel" style="font-size:1.6rem;color:var(--navy);margin:6px 0;">&lt;5 MIN</div>
+      <p style="font-size:.78rem;color:rgba(42,58,90,.65);">Konfirmasi masuk ke WA kamu setelah form dikirim.</p>
+    </div>
+  </div>
+
 </div>
 
 <!-- SUCCESS MODAL -->
-<div class="modal-overlay" id="success-modal">
-    <div class="modal-box">
-        <div class="modal-icon">&#127881;</div>
-        <div class="modal-title">ORDER BERHASIL DIKIRIM!</div>
-        <p style="font-size:0.82rem; color:var(--muted)">ID Order kamu:</p>
-        <div class="modal-id" id="modal-id-val">TD-...</div>
-        <p class="modal-body">Simpan ID di atas untuk cek status. Kamu akan diarahkan ke WhatsApp untuk konfirmasi dengan tim kami.</p>
-        <div class="modal-btns">
-            <a id="wa-link" href="#" target="_blank" class="btn-modal-main">LANJUT KE WHATSAPP</a>
-            <a href="index.html#tracker" class="btn-modal-sec">CEK STATUS NANTI</a>
-        </div>
+<div class="modal-overlay" id="modal">
+  <div class="modal-box">
+    <div style="font-size:2.5rem;margin-bottom:14px;">&#127881;</div>
+    <div class="modal-title">ORDER BERHASIL DIKIRIM!</div>
+    <p style="font-size:.82rem;color:var(--muted);">ID Order kamu:</p>
+    <div class="modal-id" id="modal-id">TD-...</div>
+    <p class="modal-body">Simpan ID ini untuk cek status order. Kamu akan diarahkan ke WhatsApp untuk konfirmasi dengan tim kami.</p>
+    <div style="display:flex;flex-direction:column;gap:10px;">
+      <a id="wa-btn" href="#" target="_blank" style="display:block;background:#25d366;color:white;padding:14px;font-family:'Press Start 2P',cursive;font-size:.58rem;text-decoration:none;border:3px solid var(--navy);">LANJUT KE WHATSAPP</a>
+      <a href="track.html" id="track-btn" style="display:block;background:white;color:var(--navy);padding:12px;font-family:'Press Start 2P',cursive;font-size:.52rem;text-decoration:none;border:3px solid var(--navy);text-align:center;">CEK STATUS ORDER</a>
     </div>
+  </div>
 </div>
 
 <script>
-    const _URL = "https://zopnowgdpheylnvzjrlb.supabase.co";
-    const _KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InpvcG5vd2dkcGhleWxudnpqcmxiIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzM4MTE2MzAsImV4cCI6MjA4OTM4NzYzMH0.9VomavT2pF6vvjzVhC5HQVCMTidTesukGAqAnPC8UyI";
-    const db = supabase.createClient(_URL, _KEY);
+  const _URL = "https://zopnowgdpheylnvzjrlb.supabase.co";
+  const _KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InpvcG5vd2dkcGhleWxudnpqcmxiIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzM4MTE2MzAsImV4cCI6MjA4OTM4NzYzMH0.9VomavT2pF6vvjzVhC5HQVCMTidTesukGAqAnPC8UyI";
+  const db = supabase.createClient(_URL, _KEY);
 
-    let currentOrderId = '';
-    let selectedFiles  = [];
-    let finalOrderData = {};
+  let orderId = '', files = [], orderPayload = {};
 
-    // ─── ORDER ID ───
-    function genOrderId() {
-        const now  = new Date();
-        const yyyy = now.getFullYear();
-        const mm   = String(now.getMonth() + 1).padStart(2, '0');
-        const dd   = String(now.getDate()).padStart(2, '0');
-        const rand = Math.random().toString(36).substring(2, 6).toUpperCase();
-        currentOrderId = `TD-${yyyy}${mm}${dd}-${rand}`;
-        document.getElementById('order-id-val').textContent = currentOrderId;
-    }
+  // ─── ID GEN ───
+  function genId() {
+    const n = new Date();
+    const d = `${n.getFullYear()}${String(n.getMonth()+1).padStart(2,'0')}${String(n.getDate()).padStart(2,'0')}`;
+    const r = Math.random().toString(36).slice(2,6).toUpperCase();
+    orderId = `TD-${d}-${r}`;
+    document.getElementById('id-display').textContent = orderId;
+  }
 
-    // ─── LOAD SERVICES ───
-    async function loadServices() {
-        const sel = document.getElementById('service_name');
-        let services = [];
-        try {
-            const { data, error } = await db.from('services').select('*').order('category');
-            if (!error && data && data.length) services = data;
-        } catch {}
+  // ─── SERVICES ───
+  async function loadSvcs() {
+    const sel = document.getElementById('service');
+    let svcs = [];
+    try {
+      const { data } = await db.from('services').select('*').order('category');
+      if (data && data.length) svcs = data;
+    } catch {}
+    if (!svcs.length) svcs = demoSvcs();
 
-        if (!services.length) services = getDemoServices();
-
-        const cats = [...new Set(services.map(s => s.category))];
-        cats.forEach(cat => {
-            const group = document.createElement('optgroup');
-            group.label = `── ${cat} ──`;
-            services.filter(s => s.category === cat).forEach(svc => {
-                const opt = document.createElement('option');
-                opt.value = svc.service_name;
-                opt.dataset.min = svc.price_min;
-                opt.dataset.max = svc.price_max;
-                opt.textContent = svc.service_name;
-                group.appendChild(opt);
-            });
-            sel.appendChild(group);
-        });
-
-        // Pre-select from URL
-        const urlService = new URLSearchParams(location.search).get('service');
-        if (urlService) {
-            const opt = [...sel.options].find(o => o.value === decodeURIComponent(urlService));
-            if (opt) { sel.value = opt.value; onServiceChange(); }
-        }
-    }
-
-    function onServiceChange() {
-        const sel  = document.getElementById('service_name');
-        const hint = document.getElementById('price-hint');
-        const opt  = sel.options[sel.selectedIndex];
-        if (opt && opt.dataset.min) {
-            hint.textContent = `Estimasi: Rp ${Math.round(opt.dataset.min / 1000)}K – Rp ${Math.round(opt.dataset.max / 1000)}K`;
-            hint.style.display = 'block';
-        } else {
-            hint.style.display = 'none';
-        }
-    }
-
-    // ─── CHAR COUNT ───
-    function updateCharCount() {
-        document.getElementById('char-now').textContent = document.getElementById('detail_request').value.length;
-    }
-
-    // ─── FILE UPLOAD ───
-    const uploadArea = document.getElementById('upload-area');
-    uploadArea.addEventListener('dragover', e => { e.preventDefault(); uploadArea.classList.add('dragover'); });
-    uploadArea.addEventListener('dragleave', () => uploadArea.classList.remove('dragover'));
-    uploadArea.addEventListener('drop', e => {
-        e.preventDefault(); uploadArea.classList.remove('dragover');
-        handleFiles(e.dataTransfer.files);
+    const cats = [...new Set(svcs.map(s => s.category))];
+    cats.forEach(cat => {
+      const g = document.createElement('optgroup');
+      g.label = `── ${cat} ──`;
+      svcs.filter(s => s.category === cat).forEach(s => {
+        const o = document.createElement('option');
+        o.value = s.service_name;
+        o.dataset.min = s.price_min;
+        o.dataset.max = s.price_max;
+        o.textContent = s.service_name;
+        g.appendChild(o);
+      });
+      sel.appendChild(g);
     });
 
-    function handleFiles(files) {
-        const errEl = document.getElementById('err-file');
-        errEl.classList.remove('show');
+    const p = new URLSearchParams(location.search).get('service');
+    if (p) {
+      const opt = [...sel.options].find(o => o.value === decodeURIComponent(p));
+      if (opt) { sel.value = opt.value; onSvcChange(); }
+    }
+  }
 
-        Array.from(files).forEach(f => {
-            if (selectedFiles.length >= 3) {
-                errEl.textContent = 'Maksimal 3 file.'; errEl.classList.add('show'); return;
-            }
-            if (f.size > 5 * 1024 * 1024) {
-                errEl.textContent = `File "${f.name}" melebihi 5MB.`; errEl.classList.add('show'); return;
-            }
-            if (selectedFiles.find(sf => sf.name === f.name)) return;
-            selectedFiles.push(f);
-        });
-        renderFileList();
-        document.getElementById('file-input').value = '';
+  function onSvcChange() {
+    const sel = document.getElementById('service');
+    const hint = document.getElementById('price-hint');
+    const opt = sel.options[sel.selectedIndex];
+    if (opt && opt.dataset.min) {
+      hint.textContent = `Estimasi: Rp ${Math.round(opt.dataset.min/1000)}K – Rp ${Math.round(opt.dataset.max/1000)}K`;
+      hint.style.display = 'block';
+    } else hint.style.display = 'none';
+  }
+
+  function updChar() {
+    document.getElementById('char-now').textContent = document.getElementById('detail').value.length;
+  }
+
+  // ─── FILE UPLOAD ───
+  const area = document.getElementById('upload-area');
+  area.addEventListener('dragover', e => { e.preventDefault(); area.classList.add('over'); });
+  area.addEventListener('dragleave', () => area.classList.remove('over'));
+  area.addEventListener('drop', e => { e.preventDefault(); area.classList.remove('over'); handleFiles(e.dataTransfer.files); });
+
+  function handleFiles(list) {
+    const err = document.getElementById('e-file');
+    err.classList.remove('show');
+    Array.from(list).forEach(f => {
+      if (files.length >= 3) { err.textContent = 'Maksimal 3 file.'; err.classList.add('show'); return; }
+      if (f.size > 5*1024*1024) { err.textContent = `"${f.name}" melebihi 5MB.`; err.classList.add('show'); return; }
+      if (files.find(x => x.name === f.name)) return;
+      files.push(f);
+    });
+    renderFiles();
+    document.getElementById('file-input').value = '';
+  }
+
+  function renderFiles() {
+    document.getElementById('file-list').innerHTML = files.map((f,i) => `
+      <div class="file-item">
+        <span class="fi-name">${f.name}</span>
+        <span class="fi-size">${(f.size/1024).toFixed(0)} KB</span>
+        <button type="button" class="fi-rm" onclick="rmFile(${i})">&#215;</button>
+      </div>`).join('');
+  }
+
+  function rmFile(i) { files.splice(i,1); renderFiles(); document.getElementById('e-file').classList.remove('show'); }
+
+  // ─── UPLOAD TO STORAGE ───
+  async function uploadFiles(id) {
+    const urls = [];
+    for (const f of files) {
+      const path = `${id}/${Date.now()}_${f.name}`;
+      const { data, error } = await db.storage.from('order-files').upload(path, f);
+      if (!error && data) {
+        const { data: u } = db.storage.from('order-files').getPublicUrl(path);
+        urls.push(u.publicUrl);
+      }
+    }
+    return urls;
+  }
+
+  // ─── VALIDATE ───
+  function validate() {
+    let ok = true;
+    const checks = [
+      { id:'name',    err:'e-name',  fn: v => v.trim().length >= 2 },
+      { id:'wa',      err:'e-wa',    fn: v => /^08\d{8,13}$/.test(v.replace(/\s/g,'')) },
+      { id:'service', err:'e-svc',   fn: v => v !== '' },
+      { id:'deadline',err:'e-dl',    fn: v => v && new Date(v) > new Date() },
+      { id:'detail',  err:'e-det',   fn: v => v.trim().length >= 20 },
+    ];
+    checks.forEach(c => {
+      const el = document.getElementById(c.id);
+      const err = document.getElementById(c.err);
+      const pass = c.fn(el.value);
+      el.classList.toggle('err', !pass);
+      err.classList.toggle('show', !pass);
+      if (!pass) ok = false;
+    });
+    const ag = document.getElementById('agree');
+    const ae = document.getElementById('e-agree');
+    if (!ag.checked) { ae.classList.add('show'); ok = false; } else ae.classList.remove('show');
+    return ok;
+  }
+
+  // ─── SUBMIT ───
+  document.getElementById('order-form').addEventListener('submit', async e => {
+    e.preventDefault();
+    if (!validate()) return;
+
+    const btn = document.getElementById('submit-btn');
+    btn.disabled = true; btn.textContent = 'MENGIRIM...';
+
+    let fileUrls = [];
+    if (files.length) {
+      btn.textContent = 'MENGUPLOAD FILE...';
+      try { fileUrls = await uploadFiles(orderId); } catch {}
     }
 
-    function renderFileList() {
-        const list = document.getElementById('file-list');
-        list.innerHTML = selectedFiles.map((f, i) => `
-            <div class="file-item">
-                <span class="file-item-name">${f.name}</span>
-                <span class="file-item-size">${(f.size / 1024).toFixed(0)} KB</span>
-                <button type="button" class="file-remove" onclick="removeFile(${i})" title="Hapus file">&#215;</button>
-            </div>
-        `).join('');
-    }
+    const dlRaw = document.getElementById('deadline').value;
+    const dlStr = new Date(dlRaw).toLocaleString('id-ID',{day:'2-digit',month:'long',year:'numeric',hour:'2-digit',minute:'2-digit'});
 
-    function removeFile(i) {
-        selectedFiles.splice(i, 1);
-        renderFileList();
-        document.getElementById('err-file').classList.remove('show');
-    }
+    orderPayload = {
+      order_id:       orderId,
+      customer_name:  document.getElementById('name').value.trim(),
+      whatsapp:       document.getElementById('wa').value.trim(),
+      service_name:   document.getElementById('service').value,
+      deadline:       dlStr,
+      detail_request: document.getElementById('detail').value.trim(),
+      status:         'Baru',
+      payment_status: 'Belum Bayar',
+      price:          parseInt(document.getElementById('price').value) || null,
+      file_urls:      fileUrls.join(', ') || null,
+    };
 
-    // ─── UPLOAD FILES TO SUPABASE STORAGE ───
-    async function uploadFiles(orderId) {
-        if (!selectedFiles.length) return [];
-        const urls = [];
-        for (const file of selectedFiles) {
-            const path = `${orderId}/${Date.now()}_${file.name}`;
-            const { data, error } = await db.storage.from('order-files').upload(path, file);
-            if (!error && data) {
-                const { data: urlData } = db.storage.from('order-files').getPublicUrl(path);
-                urls.push(urlData.publicUrl);
-            }
-        }
-        return urls;
-    }
+    btn.textContent = 'MENYIMPAN...';
+    try { await db.from('orders').insert([orderPayload]); } catch {}
 
-    // ─── VALIDATION ───
-    function validate() {
-        let ok = true;
-        const checks = [
-            { id:'customer_name', errId:'err-name',    fn: v => v.trim().length >= 2 },
-            { id:'whatsapp',      errId:'err-wa',       fn: v => /^08\d{8,13}$/.test(v.replace(/\s/g,'')) },
-            { id:'service_name',  errId:'err-service',  fn: v => v !== '' },
-            { id:'deadline',      errId:'err-deadline', fn: v => v && new Date(v) > new Date() },
-            { id:'detail_request',errId:'err-detail',   fn: v => v.trim().length >= 20 },
-        ];
-        checks.forEach(c => {
-            const el  = document.getElementById(c.id);
-            const err = document.getElementById(c.errId);
-            const pass = c.fn(el.value);
-            el.classList.toggle('error', !pass);
-            err.classList.toggle('show', !pass);
-            if (!pass) ok = false;
-        });
-        const agree = document.getElementById('agree');
-        const agreeErr = document.getElementById('err-agree');
-        if (!agree.checked) { agreeErr.classList.add('show'); ok = false; }
-        else agreeErr.classList.remove('show');
-        return ok;
-    }
-
-    // ─── SUBMIT ───
-    document.getElementById('order-form').addEventListener('submit', async e => {
-        e.preventDefault();
-        if (!validate()) return;
-
-        const btn = document.getElementById('submit-btn');
-        btn.disabled = true;
-        btn.textContent = 'MENGIRIM ORDER...';
-
-        // Upload files first
-        let fileUrls = [];
-        if (selectedFiles.length) {
-            btn.textContent = 'MENGUPLOAD FILE...';
-            try { fileUrls = await uploadFiles(currentOrderId); } catch {}
-        }
-
-        const deadlineRaw = document.getElementById('deadline').value;
-        const deadlineStr = new Date(deadlineRaw).toLocaleString('id-ID', { day:'2-digit', month:'long', year:'numeric', hour:'2-digit', minute:'2-digit' });
-
-        finalOrderData = {
-            order_id:       currentOrderId,
-            customer_name:  document.getElementById('customer_name').value.trim(),
-            whatsapp:       document.getElementById('whatsapp').value.trim(),
-            service_name:   document.getElementById('service_name').value,
-            deadline:       deadlineStr,
-            detail_request: document.getElementById('detail_request').value.trim(),
-            status:         'Baru',
-            payment_status: 'Belum Bayar',
-            price:          parseInt(document.getElementById('price').value) || null,
-            file_urls:      fileUrls.join(', ') || null,
-        };
-
-        btn.textContent = 'MENYIMPAN DATA...';
-        try {
-            await db.from('orders').insert([finalOrderData]);
-        } catch (err) {
-            console.warn('DB insert error:', err);
-        }
-
-        // Build WA message
-        const d = finalOrderData;
-        const fileNote = fileUrls.length ? `\n\n📎 File referensi sudah diupload (${fileUrls.length} file)` : '';
-        const msg = encodeURIComponent(
+    // WA message
+    const d = orderPayload;
+    const fileNote = fileUrls.length ? `\n\nFile referensi: ${fileUrls.length} file sudah diupload.` : '';
+    const msg = encodeURIComponent(
 `━━━━━━━━━━━━━━━━━━━━
 KONFIRMASI ORDER — TUGASIN DIGITAL
 ━━━━━━━━━━━━━━━━━━━━
-
-Halo! Berikut detail order saya:
 
 ID Order  : ${d.order_id}
 Nama      : ${d.customer_name}
 Layanan   : ${d.service_name}
 Deadline  : ${d.deadline}
-Budget    : ${d.price ? 'Rp ' + d.price.toLocaleString('id-ID') : 'Diskusi'}
+Budget    : ${d.price ? 'Rp '+d.price.toLocaleString('id-ID') : 'Diskusi'}
 
-Detail Request:
+Detail:
 ${d.detail_request}${fileNote}
 
-Mohon konfirmasi dan info pembayaran DP-nya ya.`
-        );
+Mohon konfirmasi dan info pembayaran DP-nya.`);
 
-        document.getElementById('modal-id-val').textContent = currentOrderId;
-        document.getElementById('wa-link').href = `https://wa.me/6289540108751?text=${msg}`;
-        document.getElementById('success-modal').classList.add('open');
+    document.getElementById('modal-id').textContent = orderId;
+    document.getElementById('wa-btn').href = `https://wa.me/6289540108751?text=${msg}`;
+    document.getElementById('track-btn').href = `track.html?id=${orderId}`;
+    document.getElementById('modal').classList.add('open');
 
-        btn.disabled = false;
-        btn.textContent = 'KIRIM ORDER';
-    });
+    btn.disabled = false; btn.textContent = 'KIRIM ORDER';
+  });
 
-    // ─── DEMO FALLBACK ───
-    function getDemoServices() {
-        return [
-            { service_name:'Esai & Makalah', category:'Tugas Akademik', price_min:35000, price_max:300000 },
-            { service_name:'PPT & Desain Canva + HyperLink', category:'Desain Visual', price_min:35000, price_max:350000 },
-            { service_name:'Coding (HTML/CSS/JS/PHP/Python/C++)', category:'Pemrograman', price_min:50000, price_max:400000 },
-            { service_name:'Laporan PKL / Praktikum', category:'Tugas Akademik', price_min:60000, price_max:450000 },
-            { service_name:'CV Portofolio & Resume', category:'Desain Visual', price_min:80000, price_max:250000 },
-            { service_name:'Kebutuhan Organisasi', category:'Organisasi', price_min:50000, price_max:400000 },
-            { service_name:'Joki Skripsi (per bab)', category:'Tugas Akademik', price_min:100000, price_max:900000 },
-            { service_name:'Desain Poster Bisnis', category:'Desain Visual', price_min:25000, price_max:220000 },
-            { service_name:'Company Profile', category:'Dokumen Bisnis', price_min:100000, price_max:900000 },
-            { service_name:'Paket Branding UMKM', category:'Bundling', price_min:200000, price_max:1500000 },
-            { service_name:'Notulensi & Surat Resmi', category:'Organisasi', price_min:20000, price_max:150000 },
-            { service_name:'Desain Pamflet & Flyer', category:'Desain Visual', price_min:50000, price_max:200000 },
-            { service_name:'Content Pack IG (5 feed)', category:'Desain Visual', price_min:100000, price_max:450000 },
-        ];
-    }
+  // ─── DEMO SERVICES ───
+  function demoSvcs() {
+    return [
+      {service_name:'Esai & Makalah',category:'Tugas Akademik',price_min:35000,price_max:300000},
+      {service_name:'PPT & Desain Canva + HyperLink',category:'Desain Visual',price_min:35000,price_max:350000},
+      {service_name:'Coding (HTML/CSS/JS/PHP/Python/C++)',category:'Pemrograman',price_min:50000,price_max:400000},
+      {service_name:'Laporan PKL / Praktikum',category:'Tugas Akademik',price_min:60000,price_max:450000},
+      {service_name:'CV Portofolio & Resume',category:'Desain Visual',price_min:80000,price_max:250000},
+      {service_name:'Kebutuhan Organisasi',category:'Organisasi',price_min:50000,price_max:400000},
+      {service_name:'Joki Skripsi (per bab)',category:'Tugas Akademik',price_min:100000,price_max:900000},
+      {service_name:'Desain Poster Bisnis',category:'Desain Visual',price_min:25000,price_max:220000},
+      {service_name:'Company Profile',category:'Dokumen Bisnis',price_min:100000,price_max:900000},
+      {service_name:'Paket Branding UMKM',category:'Bundling',price_min:200000,price_max:1500000},
+      {service_name:'Notulensi & Surat Resmi',category:'Organisasi',price_min:20000,price_max:150000},
+      {service_name:'Desain Pamflet & Flyer',category:'Desain Visual',price_min:50000,price_max:200000},
+    ];
+  }
 
-    // ─── INIT ───
-    genOrderId();
-    loadServices();
-    const minDL = new Date(Date.now() + 60 * 60 * 1000);
-    document.getElementById('deadline').min = minDL.toISOString().slice(0, 16);
+  // ─── INIT ───
+  genId();
+  loadSvcs();
+  const minDl = new Date(Date.now() + 3600000);
+  document.getElementById('deadline').min = minDl.toISOString().slice(0,16);
 </script>
 </body>
 </html>
